@@ -1,0 +1,156 @@
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { bookingApi, BOOKING_STATUSES, money, parseError, statusClass } from '../../api.js'
+import DataTable from '../../components/DataTable.jsx'
+import ConfirmDialog from '../../components/ConfirmDialog.jsx'
+import { Alert } from '../../components/FormField.jsx'
+
+export default function BookingList() {
+  const [rows, setRows] = useState([])
+  const [status, setStatus] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [target, setTarget] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const navigate = useNavigate()
+
+  const load = () => {
+    setLoading(true)
+    bookingApi.list({ status, from, to })
+      .then((data) => { setRows(data); setError('') })
+      .catch((err) => setError(parseError(err).message))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    // Only send the date range once both ends are filled in.
+    if ((from && !to) || (!from && to)) return
+    load()
+  }, [status, from, to])
+
+  const changeStatus = (b, next) => {
+    bookingApi.setStatus(b.bookingId, next)
+      .then(() => { setNotice(`Booking #${b.bookingId} is now ${next}.`); load() })
+      .catch((err) => setError(parseError(err).message))
+  }
+
+  const confirmDelete = () => {
+    setBusy(true)
+    bookingApi.remove(target.bookingId)
+      .then(() => { setNotice(`Booking #${target.bookingId} was cancelled and removed.`); setTarget(null); load() })
+      .catch((err) => { setError(parseError(err).message); setTarget(null) })
+      .finally(() => setBusy(false))
+  }
+
+  const clearFilters = () => { setStatus(''); setFrom(''); setTo('') }
+
+  const columns = [
+    { key: 'bookingId', header: '#', render: (b) => <Link to={`/bookings/${b.bookingId}`} className="cell-strong">#{b.bookingId}</Link> },
+    {
+      key: 'customer', header: 'Customer',
+      render: (b) => (
+        <>
+          <div className="cell-strong">{b.customer?.fullName ?? '—'}</div>
+          <div className="cell-sub">{b.customer?.phone}</div>
+        </>
+      ),
+    },
+    {
+      key: 'vehicle', header: 'Vehicle',
+      render: (b) => (
+        <>
+          <div className="mono">{b.vehicle?.registrationNumber ?? '—'}</div>
+          <div className="cell-sub">{b.vehicle?.brand} {b.vehicle?.model}</div>
+        </>
+      ),
+    },
+    { key: 'driver', header: 'Driver', render: (b) => b.driver?.fullName ?? <span className="cell-sub">Self-drive</span> },
+    {
+      key: 'period', header: 'Period',
+      render: (b) => (
+        <>
+          <div>{b.startDate} → {b.endDate}</div>
+          <div className="cell-sub">{b.totalDays} day{b.totalDays === 1 ? '' : 's'}</div>
+        </>
+      ),
+    },
+    { key: 'totalAmount', header: 'Total', align: 'right', render: (b) => <span className="cell-strong">{money(b.totalAmount)}</span> },
+    {
+      key: 'status', header: 'Status',
+      render: (b) => (
+        <select
+          className={statusClass(b.status)}
+          style={{ border: 'none', cursor: 'pointer', font: 'inherit', fontWeight: 600, padding: '3px 6px' }}
+          value={b.status}
+          onChange={(e) => changeStatus(b, e.target.value)}
+        >
+          {BOOKING_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      ),
+    },
+  ]
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <h1>Bookings</h1>
+          <p>Rental bookings. The total is calculated by the server from the dates and rates.</p>
+        </div>
+        <Link to="/bookings/new" className="btn btn-primary">+ New Booking</Link>
+      </div>
+
+      <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
+      <Alert kind="success" onClose={() => setNotice('')}>{notice}</Alert>
+
+      <div className="card">
+        <div className="card-head">
+          <div className="toolbar">
+            <select className="select" value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">All statuses</option>
+              {BOOKING_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <span className="cell-sub" style={{ marginLeft: 4 }}>Period</span>
+            <input className="input" type="date" value={from} onChange={(e) => setFrom(e.target.value)}
+                   aria-label="From date" title="From date" />
+            <span className="cell-sub">to</span>
+            <input className="input" type="date" value={to} onChange={(e) => setTo(e.target.value)}
+                   aria-label="To date" title="To date" />
+            {(status || from || to) && (
+              <button className="btn btn-secondary btn-sm" onClick={clearFilters}>Clear</button>
+            )}
+          </div>
+          <span className="cell-sub">{rows.length} booking{rows.length === 1 ? '' : 's'}</span>
+        </div>
+
+        <DataTable
+          columns={columns}
+          rows={rows}
+          loading={loading}
+          rowKey={(b) => b.bookingId}
+          emptyTitle="No bookings found"
+          emptyText="Adjust the filters, or create a new booking."
+          actions={(b) => (
+            <>
+              <button className="btn-link" onClick={() => navigate(`/bookings/${b.bookingId}`)}>View</button>
+              <button className="btn-link" onClick={() => navigate(`/bookings/${b.bookingId}/edit`)}>Edit</button>
+              <button className="btn-link danger" onClick={() => setTarget(b)}>Delete</button>
+            </>
+          )}
+        />
+      </div>
+
+      <ConfirmDialog
+        open={!!target}
+        busy={busy}
+        title="Delete booking?"
+        message={`Booking #${target?.bookingId} and all payments recorded against it will be removed. This cannot be undone.`}
+        onConfirm={confirmDelete}
+        onCancel={() => setTarget(null)}
+      />
+    </>
+  )
+}

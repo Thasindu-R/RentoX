@@ -1,0 +1,114 @@
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { customerApi, parseError } from '../../api.js'
+import DataTable from '../../components/DataTable.jsx'
+import ConfirmDialog from '../../components/ConfirmDialog.jsx'
+import { Alert } from '../../components/FormField.jsx'
+
+export default function CustomerList() {
+  const [rows, setRows] = useState([])
+  const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [target, setTarget] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const navigate = useNavigate()
+
+  const load = (q = '') => {
+    setLoading(true)
+    customerApi.list(q)
+      .then((data) => { setRows(data); setError('') })
+      .catch((err) => setError(parseError(err).message))
+      .finally(() => setLoading(false))
+  }
+
+  // Debounced search: waits 300ms after typing stops so we do not fire a
+  // request on every keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => load(search), 300)
+    return () => clearTimeout(t)
+  }, [search])
+
+  const confirmDelete = () => {
+    setBusy(true)
+    customerApi.remove(target.customerId)
+      .then(() => {
+        setNotice(`${target.fullName} was deleted.`)
+        setTarget(null)
+        load(search)
+      })
+      .catch((err) => { setError(parseError(err).message); setTarget(null) })
+      .finally(() => setBusy(false))
+  }
+
+  const columns = [
+    {
+      key: 'fullName', header: 'Customer',
+      render: (c) => (
+        <>
+          <div className="cell-strong">{c.fullName}</div>
+          <div className="cell-sub">{c.email || 'No email'}</div>
+        </>
+      ),
+    },
+    { key: 'nic', header: 'NIC', render: (c) => <span className="mono">{c.nic}</span> },
+    { key: 'drivingLicenceNo', header: 'Licence', render: (c) => <span className="mono">{c.drivingLicenceNo}</span> },
+    { key: 'phone', header: 'Phone' },
+    { key: 'address', header: 'Address' },
+    { key: 'registeredDate', header: 'Registered' },
+  ]
+
+  return (
+    <>
+      <div className="page-head">
+        <div>
+          <h1>Customers</h1>
+          <p>People who rent vehicles from us.</p>
+        </div>
+        <Link to="/customers/new" className="btn btn-primary">+ Add Customer</Link>
+      </div>
+
+      <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
+      <Alert kind="success" onClose={() => setNotice('')}>{notice}</Alert>
+
+      <div className="card">
+        <div className="card-head">
+          <div className="toolbar">
+            <input
+              className="input grow"
+              placeholder="Search by name or NIC…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <span className="cell-sub">{rows.length} record{rows.length === 1 ? '' : 's'}</span>
+        </div>
+
+        <DataTable
+          columns={columns}
+          rows={rows}
+          loading={loading}
+          rowKey={(c) => c.customerId}
+          emptyTitle={search ? 'No matches' : 'No customers yet'}
+          emptyText={search ? 'Try a different name or NIC.' : 'Add your first customer to get started.'}
+          actions={(c) => (
+            <>
+              <button className="btn-link" onClick={() => navigate(`/customers/${c.customerId}/edit`)}>Edit</button>
+              <button className="btn-link danger" onClick={() => setTarget(c)}>Delete</button>
+            </>
+          )}
+        />
+      </div>
+
+      <ConfirmDialog
+        open={!!target}
+        busy={busy}
+        title="Delete customer?"
+        message={`This will permanently remove ${target?.fullName}. Customers with existing bookings cannot be deleted.`}
+        onConfirm={confirmDelete}
+        onCancel={() => setTarget(null)}
+      />
+    </>
+  )
+}
