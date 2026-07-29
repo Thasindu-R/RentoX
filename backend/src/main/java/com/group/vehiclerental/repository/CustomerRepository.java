@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * JpaRepository already provides save, findAll, findById, deleteById and more.
@@ -20,6 +21,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
      *   WHERE LOWER(full_name) LIKE %?% OR LOWER(nic) LIKE %?%
      */
     List<Customer> findByFullNameContainingIgnoreCaseOrNicContainingIgnoreCase(String name, String nic);
+
+    Optional<Customer> findByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 
     boolean existsByNic(String nic);
 

@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,6 +30,8 @@ import java.util.List;
  * POST   /api/vehicles                      create
  * PUT    /api/vehicles/{id}                 update
  * PATCH  /api/vehicles/{id}/status          change status only
+ * POST   /api/vehicles/{id}/photo           upload a photo (multipart)
+ * DELETE /api/vehicles/{id}/photo           remove the photo
  * DELETE /api/vehicles/{id}                 delete
  */
 @RestController
@@ -71,6 +75,21 @@ public class VehicleController {
     @PatchMapping("/{id}/status")
     public Vehicle updateStatus(@PathVariable Integer id, @RequestParam String status) {
         return vehicleService.updateStatus(id, status);
+    }
+
+    /**
+     * Photo upload. Sent as multipart/form-data with a part named "file",
+     * not JSON - a JPEG cannot travel inside a JSON body.
+     */
+    @PostMapping("/{id}/photo")
+    public Vehicle uploadPhoto(@PathVariable Integer id,
+                               @RequestPart("file") MultipartFile file) {
+        return vehicleService.storePhoto(id, file);
+    }
+
+    @DeleteMapping("/{id}/photo")
+    public Vehicle removePhoto(@PathVariable Integer id) {
+        return vehicleService.removePhoto(id);
     }
 
     @DeleteMapping("/{id}")

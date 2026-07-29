@@ -31,3 +31,4 @@ Thumbs.db
 application-local.properties
 .env
 .env.local
+uploads/

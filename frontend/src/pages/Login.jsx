@@ -30,7 +30,7 @@ export default function Login({ onLogin }) {
           <div className="brand-mark">R</div>
           <div>
             <div className="login-title">RentoX</div>
-            <div className="login-sub">Vehicle Rental Management</div>
+            <div className="login-sub">Staff Portal</div>
           </div>
         </div>
 
@@ -63,6 +63,9 @@ export default function Login({ onLogin }) {
 
         <div className="login-hint">
           Staff login — <strong>admin</strong> / <strong>admin123</strong>
+          <div style={{ marginTop: 8 }}>
+            <a href="/">← Back to the public site</a>
+          </div>
         </div>
       </form>
     </div>

@@ -100,6 +100,15 @@ public class Vehicle {
     @Column(name = "status", nullable = false, length = 20)
     private String status = "AVAILABLE";
 
+    /**
+     * File name of the uploaded photo, e.g. "vehicle-1-a3f9.jpg". The browser
+     * loads it from http://localhost:8080/uploads/<name>. Null means the UI
+     * shows a placeholder instead.
+     */
+    @Size(max = 255)
+    @Column(name = "image_path", length = 255)
+    private String imagePath;
+
     /** Inverse side - Booking.vehicle owns the vehicle_id foreign key. */
     @OneToMany(mappedBy = "vehicle")
     @JsonIgnore
@@ -190,6 +199,14 @@ public class Vehicle {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public List<Booking> getBookings() {

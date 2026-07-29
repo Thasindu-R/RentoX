@@ -54,7 +54,7 @@ export default function PaymentList() {
     {
       key: 'booking', header: 'Booking',
       render: (p) => (
-        <Link to={`/bookings/${p.booking?.bookingId}`}>
+        <Link to={`/staff/bookings/${p.booking?.bookingId}`}>
           #{p.booking?.bookingId}
         </Link>
       ),
@@ -72,7 +72,7 @@ export default function PaymentList() {
           <h1>Payments</h1>
           <p>Payments recorded against bookings.</p>
         </div>
-        <Link to="/payments/new" className="btn btn-primary">+ Record Payment</Link>
+        <Link to="/staff/payments/new" className="btn btn-primary">+ Record Payment</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -106,7 +106,7 @@ export default function PaymentList() {
           emptyText="Record a payment against a booking to see it here."
           actions={(p) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/payments/${p.paymentId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/payments/${p.paymentId}/edit`)}>Edit</button>
               <button className="btn-link danger" onClick={() => setTarget(p)}>Delete</button>
             </>
           )}

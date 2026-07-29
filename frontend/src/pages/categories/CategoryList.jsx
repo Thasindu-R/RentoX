@@ -56,7 +56,7 @@ export default function CategoryList() {
           <h1>Vehicle Categories</h1>
           <p>Vehicle types and the daily rate used to price bookings.</p>
         </div>
-        <Link to="/categories/new" className="btn btn-primary">+ Add Category</Link>
+        <Link to="/staff/categories/new" className="btn btn-primary">+ Add Category</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -84,7 +84,7 @@ export default function CategoryList() {
           emptyText={search ? 'Try a different name.' : 'Add Car, Van, SUV and so on to get started.'}
           actions={(c) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/categories/${c.categoryId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/categories/${c.categoryId}/edit`)}>Edit</button>
               <button className="btn-link danger" onClick={() => setTarget(c)}>Delete</button>
             </>
           )}

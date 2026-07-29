@@ -43,7 +43,7 @@ export default function DriverForm() {
 
     const request = editing ? driverApi.update(id, payload) : driverApi.create(payload)
     request
-      .then(() => navigate('/drivers'))
+      .then(() => navigate('/staff/drivers'))
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -94,7 +94,7 @@ export default function DriverForm() {
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/drivers')} disabled={saving}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/staff/drivers')} disabled={saving}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>

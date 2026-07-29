@@ -46,7 +46,7 @@ export default function BookingDetail() {
     return (
       <>
         <Alert kind="error">{error || 'Booking not found.'}</Alert>
-        <Link to="/bookings" className="btn btn-secondary">← Back to bookings</Link>
+        <Link to="/staff/bookings" className="btn btn-secondary">← Back to bookings</Link>
       </>
     )
   }
@@ -70,9 +70,9 @@ export default function BookingDetail() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 9 }}>
-          <button className="btn btn-secondary" onClick={() => navigate('/bookings')}>← Back</button>
-          <button className="btn btn-secondary" onClick={() => navigate(`/bookings/${id}/edit`)}>Edit</button>
-          <Link to="/payments/new" className="btn btn-primary">+ Record Payment</Link>
+          <button className="btn btn-secondary" onClick={() => navigate('/staff/bookings')}>← Back</button>
+          <button className="btn btn-secondary" onClick={() => navigate(`/staff/bookings/${id}/edit`)}>Edit</button>
+          <Link to="/staff/payments/new" className="btn btn-primary">+ Record Payment</Link>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function BookingDetail() {
       <div className="card">
         <div className="card-head">
           <h2>Payments</h2>
-          <Link to="/payments/new" className="btn-link">+ Record payment</Link>
+          <Link to="/staff/payments/new" className="btn-link">+ Record payment</Link>
         </div>
         <DataTable
           columns={paymentColumns}

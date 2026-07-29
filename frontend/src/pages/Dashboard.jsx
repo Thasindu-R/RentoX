@@ -49,7 +49,7 @@ export default function Dashboard() {
   }, [])
 
   const columns = [
-    { key: 'bookingId', header: '#', render: (b) => <Link to={`/bookings/${b.bookingId}`}>#{b.bookingId}</Link> },
+    { key: 'bookingId', header: '#', render: (b) => <Link to={`/staff/bookings/${b.bookingId}`}>#{b.bookingId}</Link> },
     { key: 'customer', header: 'Customer', render: (b) => b.customer?.fullName ?? '—' },
     { key: 'vehicle', header: 'Vehicle', render: (b) => <span className="mono">{b.vehicle?.registrationNumber ?? '—'}</span> },
     { key: 'dates', header: 'Period', render: (b) => `${b.startDate} → ${b.endDate}` },
@@ -64,7 +64,7 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
           <p>Fleet and booking summary at a glance.</p>
         </div>
-        <Link to="/bookings/new" className="btn btn-primary">+ New Booking</Link>
+        <Link to="/staff/bookings/new" className="btn btn-primary">+ New Booking</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -83,7 +83,7 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-head">
               <h2>Recent Bookings</h2>
-              <Link to="/bookings" className="btn-link">View all →</Link>
+              <Link to="/staff/bookings" className="btn-link">View all →</Link>
             </div>
             <DataTable
               columns={columns}

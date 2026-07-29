@@ -71,7 +71,7 @@ export default function PaymentForm() {
 
     const request = editing ? paymentApi.update(id, payload) : paymentApi.create(payload)
     request
-      .then(() => navigate('/payments'))
+      .then(() => navigate('/staff/payments'))
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -145,7 +145,7 @@ export default function PaymentForm() {
           )}
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/payments')} disabled={saving}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/staff/payments')} disabled={saving}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving || bookings.length === 0}>

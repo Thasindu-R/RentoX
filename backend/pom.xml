@@ -44,6 +44,17 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!--
+          Password hashing only. This is the small spring-security-crypto
+          library, NOT spring-boot-starter-security: it gives us
+          BCryptPasswordEncoder without switching on Spring Security's filter
+          chain, which would otherwise lock every endpoint behind a login page.
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- MySQL JDBC driver. Runtime only - compiled code never imports it. -->
         <dependency>
             <groupId>com.mysql</groupId>

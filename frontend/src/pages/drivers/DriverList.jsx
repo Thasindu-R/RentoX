@@ -79,7 +79,7 @@ export default function DriverList() {
           <h1>Drivers</h1>
           <p>Drivers who can be assigned to "with driver" rentals.</p>
         </div>
-        <Link to="/drivers/new" className="btn btn-primary">+ Add Driver</Link>
+        <Link to="/staff/drivers/new" className="btn btn-primary">+ Add Driver</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -112,7 +112,7 @@ export default function DriverList() {
           emptyText="Adjust the filter, or add a driver."
           actions={(d) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/drivers/${d.driverId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/drivers/${d.driverId}/edit`)}>Edit</button>
               <button className="btn-link danger" onClick={() => setTarget(d)}>Delete</button>
             </>
           )}

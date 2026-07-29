@@ -35,6 +35,15 @@ public class BookingRequest {
     /** PENDING, ACTIVE, COMPLETED, CANCELLED - defaults to PENDING. */
     private String status;
 
+    /**
+     * Collected by the public rent form. Sign-up does not ask for licence
+     * details, so the first time a customer books we capture them here and
+     * save them onto their customer record.
+     */
+    private String nic;
+
+    private String drivingLicenceNo;
+
     public BookingRequest() {
     }
 
@@ -84,5 +93,21 @@ public class BookingRequest {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getNic() {
+        return nic;
+    }
+
+    public void setNic(String nic) {
+        this.nic = nic;
+    }
+
+    public String getDrivingLicenceNo() {
+        return drivingLicenceNo;
+    }
+
+    public void setDrivingLicenceNo(String drivingLicenceNo) {
+        this.drivingLicenceNo = drivingLicenceNo;
     }
 }

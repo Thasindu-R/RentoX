@@ -8,6 +8,7 @@ import FormField, { Alert } from '../../components/FormField.jsx'
 const EMPTY = {
   customerId: '', vehicleId: '', driverId: '',
   startDate: '', endDate: '', status: 'PENDING',
+  nic: '', drivingLicenceNo: '',
 }
 
 export default function BookingForm() {
@@ -41,6 +42,8 @@ export default function BookingForm() {
             startDate: b.startDate ?? '',
             endDate: b.endDate ?? '',
             status: b.status ?? 'PENDING',
+            nic: b.customer?.nic ?? '',
+            drivingLicenceNo: b.customer?.drivingLicenceNo ?? '',
           })
         )
       )
@@ -53,7 +56,16 @@ export default function BookingForm() {
 
   const change = (e) => {
     const { name, value } = e.target
-    setForm((f) => ({ ...f, [name]: value }))
+    setForm((f) => {
+      const next = { ...f, [name]: value }
+      // Picking a customer pulls in whatever licence details we already hold.
+      if (name === 'customerId') {
+        const c = customers.find((x) => String(x.customerId) === String(value))
+        next.nic = c?.nic ?? ''
+        next.drivingLicenceNo = c?.drivingLicenceNo ?? ''
+      }
+      return next
+    })
     setFieldErrors((fe) => (fe[name] ? { ...fe, [name]: undefined } : fe))
   }
 
@@ -100,11 +112,13 @@ export default function BookingForm() {
       startDate: form.startDate,
       endDate: form.endDate,
       status: form.status,
+      nic: form.nic,
+      drivingLicenceNo: form.drivingLicenceNo,
     }
 
     const request = editing ? bookingApi.update(id, payload) : bookingApi.create(payload)
     request
-      .then((saved) => navigate(`/bookings/${saved.bookingId}`))
+      .then((saved) => navigate(`/staff/bookings/${saved.bookingId}`))
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -162,6 +176,12 @@ export default function BookingForm() {
             <FormField label="End Date" name="endDate" type="date" value={form.endDate} onChange={change}
                        required error={fieldErrors.endDate}
                        hint="Same day as the start counts as one day" />
+            <FormField label="Customer NIC" name="nic" value={form.nic} onChange={change}
+                       required error={fieldErrors.nic} placeholder="200012345678"
+                       hint="Saved to the customer record if not already held" />
+            <FormField label="Driving Licence No" name="drivingLicenceNo" value={form.drivingLicenceNo}
+                       onChange={change} required error={fieldErrors.drivingLicenceNo}
+                       placeholder="B1234567" />
           </div>
 
           {estimate && (
@@ -188,7 +208,7 @@ export default function BookingForm() {
           )}
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/bookings')} disabled={saving}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/staff/bookings')} disabled={saving}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving || missing}>

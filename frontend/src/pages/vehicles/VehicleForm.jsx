@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  categoryApi, FUEL_TYPES, parseError, TRANSMISSIONS, vehicleApi, VEHICLE_STATUSES,
+  categoryApi, FUEL_TYPES, parseError, TRANSMISSIONS, vehicleApi,
+  vehicleImageUrl, VEHICLE_STATUSES,
 } from '../../api.js'
 import FormField, { Alert } from '../../components/FormField.jsx'
 
@@ -21,6 +22,8 @@ export default function VehicleForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [photoUrl, setPhotoUrl] = useState(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
 
   useEffect(() => {
     const jobs = [categoryApi.list().then(setCategories)]
@@ -28,7 +31,8 @@ export default function VehicleForm() {
     if (editing) {
       // The API returns a nested category object; the form works with the id.
       jobs.push(
-        vehicleApi.get(id).then((v) =>
+        vehicleApi.get(id).then((v) => {
+          setPhotoUrl(vehicleImageUrl(v))
           setForm({
             registrationNumber: v.registrationNumber ?? '',
             brand: v.brand ?? '',
@@ -39,7 +43,7 @@ export default function VehicleForm() {
             categoryId: v.category?.categoryId ?? '',
             status: v.status ?? 'AVAILABLE',
           })
-        )
+        })
       )
     }
 
@@ -52,6 +56,29 @@ export default function VehicleForm() {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
     setFieldErrors((fe) => (fe[name] ? { ...fe, [name]: undefined } : fe))
+  }
+
+  /**
+   * Uploads immediately on file selection rather than waiting for Save, because
+   * the file goes to a different endpoint (multipart) than the rest of the form.
+   */
+  const onPickPhoto = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoBusy(true)
+    setError('')
+    vehicleApi.uploadPhoto(id, file)
+      .then((v) => setPhotoUrl(vehicleImageUrl(v)))
+      .catch((err) => setError(parseError(err).message))
+      .finally(() => { setPhotoBusy(false); e.target.value = '' })
+  }
+
+  const onRemovePhoto = () => {
+    setPhotoBusy(true)
+    vehicleApi.removePhoto(id)
+      .then(() => setPhotoUrl(null))
+      .catch((err) => setError(parseError(err).message))
+      .finally(() => setPhotoBusy(false))
   }
 
   const submit = (e) => {
@@ -70,7 +97,7 @@ export default function VehicleForm() {
 
     const request = editing ? vehicleApi.update(id, payload) : vehicleApi.create(payload)
     request
-      .then(() => navigate('/vehicles'))
+      .then(() => navigate('/staff/vehicles'))
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -123,8 +150,39 @@ export default function VehicleForm() {
                        onChange={change} error={fieldErrors.transmission} options={TRANSMISSIONS} />
           </div>
 
+          <div style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: 14, marginBottom: 4 }}>Photo</h3>
+            <p className="cell-sub" style={{ marginBottom: 12 }}>
+              Shown to customers on the public browse page. JPG, PNG, WEBP or GIF, up to 5 MB.
+            </p>
+
+            {editing ? (
+              <div className="photo-editor">
+                {photoUrl
+                  ? <img className="photo-preview" src={photoUrl} alt="Vehicle" />
+                  : <div className="photo-preview empty">No photo</div>}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
+                    {photoBusy ? 'Uploading…' : photoUrl ? 'Replace photo' : 'Upload photo'}
+                    <input type="file" accept="image/*" onChange={onPickPhoto}
+                           disabled={photoBusy} style={{ display: 'none' }} />
+                  </label>
+                  {photoUrl && (
+                    <button type="button" className="btn-link danger" onClick={onRemovePhoto} disabled={photoBusy}>
+                      Remove photo
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="field-hint">
+                Save the vehicle first — then reopen it to upload a photo.
+              </div>
+            )}
+          </div>
+
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/vehicles')} disabled={saving}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/staff/vehicles')} disabled={saving}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving || categories.length === 0}>

@@ -40,13 +40,32 @@ export function parseError(err) {
 
 const body = (res) => res.data
 
+/** Where the Spring Boot server lives, for images served outside /api. */
+export const SERVER_URL = 'http://localhost:8080'
+
+/**
+ * Full URL of a vehicle photo, or null when the vehicle has none.
+ * The backend stores only the file name and serves the file from /uploads.
+ */
+export function vehicleImageUrl(vehicle) {
+  return vehicle?.imagePath ? `${SERVER_URL}/uploads/${vehicle.imagePath}` : null
+}
+
+/* ------------------------------------------------------------------ */
+/*  Public authentication - customers only                            */
+/* ------------------------------------------------------------------ */
+export const authApi = {
+  signup: (data) => http.post('/auth/signup', data).then(body),
+  login: (data) => http.post('/auth/login', data).then(body),
+}
+
 /* ------------------------------------------------------------------ */
 /*  Module 1 - Customers                                              */
 /* ------------------------------------------------------------------ */
 export const customerApi = {
   list: (search) => http.get('/customers', { params: search ? { search } : {} }).then(body),
   get: (id) => http.get(`/customers/${id}`).then(body),
-  create: (data) => http.post('/customers', data).then(body),
+  // No create() on purpose - customers sign up via authApi.signup.
   update: (id, data) => http.put(`/customers/${id}`, data).then(body),
   remove: (id) => http.delete(`/customers/${id}`).then(body),
   count: () => http.get('/customers/count').then(body),
@@ -80,6 +99,19 @@ export const vehicleApi = {
   create: (data) => http.post('/vehicles', data).then(body),
   update: (id, data) => http.put(`/vehicles/${id}`, data).then(body),
   setStatus: (id, status) => http.patch(`/vehicles/${id}/status`, null, { params: { status } }).then(body),
+  /**
+   * Photo upload. FormData - not JSON - because a file cannot be sent as JSON.
+   * Axios sets the multipart Content-Type (with its boundary) automatically,
+   * so we clear the instance's application/json header for this one call.
+   */
+  uploadPhoto: (id, file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return http.post(`/vehicles/${id}/photo`, form, {
+      headers: { 'Content-Type': undefined },
+    }).then(body)
+  },
+  removePhoto: (id) => http.delete(`/vehicles/${id}/photo`).then(body),
   remove: (id) => http.delete(`/vehicles/${id}`).then(body),
   count: (status) => http.get('/vehicles/count', { params: status ? { status } : {} }).then(body),
 }

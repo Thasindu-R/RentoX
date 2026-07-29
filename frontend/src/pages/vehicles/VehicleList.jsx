@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { categoryApi, money, parseError, statusClass, vehicleApi, VEHICLE_STATUSES } from '../../api.js'
+import { categoryApi, money, parseError, statusClass, vehicleApi, vehicleImageUrl, VEHICLE_STATUSES } from '../../api.js'
 import DataTable from '../../components/DataTable.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import { Alert } from '../../components/FormField.jsx'
@@ -59,6 +59,15 @@ export default function VehicleList() {
 
   const columns = [
     {
+      key: 'photo', header: '', width: '64px',
+      render: (v) => {
+        const img = vehicleImageUrl(v)
+        return img
+          ? <img className="table-thumb" src={img} alt="" />
+          : <span className="table-thumb" />
+      },
+    },
+    {
       key: 'registrationNumber', header: 'Vehicle',
       render: (v) => (
         <>
@@ -95,7 +104,7 @@ export default function VehicleList() {
           <h1>Vehicles</h1>
           <p>The rental fleet. Click a status badge to change it.</p>
         </div>
-        <Link to="/vehicles/new" className="btn btn-primary">+ Add Vehicle</Link>
+        <Link to="/staff/vehicles/new" className="btn btn-primary">+ Add Vehicle</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -133,7 +142,7 @@ export default function VehicleList() {
           emptyText="Adjust the filters, or add a vehicle to the fleet."
           actions={(v) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/vehicles/${v.vehicleId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/vehicles/${v.vehicleId}/edit`)}>Edit</button>
               <button className="btn-link danger" onClick={() => setTarget(v)}>Delete</button>
             </>
           )}
