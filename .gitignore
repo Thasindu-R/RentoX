@@ -1,0 +1,33 @@
+# ----- Java / Maven (backend) -----
+target/
+*.jar
+*.war
+*.class
+
+# ----- IDE -----
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# ----- Node / React (frontend) -----
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# ----- Logs -----
+*.log
+npm-debug.log*
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+
+# ----- Local secrets -----
+# Copy application.properties and keep real DB passwords out of Git.
+application-local.properties
+.env
+.env.local
