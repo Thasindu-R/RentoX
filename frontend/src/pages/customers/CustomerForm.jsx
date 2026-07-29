@@ -45,7 +45,7 @@ export default function CustomerForm() {
 
     const request = editing ? customerApi.update(id, payload) : customerApi.create(payload)
     request
-      .then(() => navigate('/customers'))
+      .then(() => navigate('/staff/customers'))
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -62,8 +62,11 @@ export default function CustomerForm() {
     <>
       <div className="page-head">
         <div>
-          <h1>{editing ? 'Edit Customer' : 'New Customer'}</h1>
-          <p>{editing ? 'Update this customer’s details.' : 'Register a customer who will rent vehicles.'}</p>
+          <h1>Edit Customer</h1>
+          <p>
+            Correct a registered customer's details. Their email and password
+            belong to them and cannot be changed here.
+          </p>
         </div>
       </div>
 
@@ -75,14 +78,15 @@ export default function CustomerForm() {
             <FormField label="Full Name" name="fullName" value={form.fullName} onChange={change}
                        required error={fieldErrors.fullName} placeholder="Nimal Perera" full />
             <FormField label="NIC" name="nic" value={form.nic} onChange={change}
-                       required error={fieldErrors.nic} placeholder="200012345678"
-                       hint="Must be unique across all customers" />
+                       error={fieldErrors.nic} placeholder="200012345678"
+                       hint="Collected on the rent form — may be empty until they book" />
             <FormField label="Driving Licence No" name="drivingLicenceNo" value={form.drivingLicenceNo}
-                       onChange={change} required error={fieldErrors.drivingLicenceNo} placeholder="B1234567" />
+                       onChange={change} error={fieldErrors.drivingLicenceNo} placeholder="B1234567" />
             <FormField label="Phone" name="phone" value={form.phone} onChange={change}
                        required error={fieldErrors.phone} placeholder="0771234567" />
-            <FormField label="Email" name="email" type="email" value={form.email} onChange={change}
-                       error={fieldErrors.email} placeholder="nimal@example.com" />
+            <FormField label="Email (read only)" name="email" type="email" value={form.email}
+                       onChange={change} disabled
+                       hint="The customer's login — changed only by them" />
             <FormField label="Address" name="address" as="textarea" value={form.address} onChange={change}
                        error={fieldErrors.address} placeholder="123 Galle Road, Colombo" full />
             {editing && (
@@ -92,7 +96,7 @@ export default function CustomerForm() {
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/customers')} disabled={saving}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/staff/customers')} disabled={saving}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>

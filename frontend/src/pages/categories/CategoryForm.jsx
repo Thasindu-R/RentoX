@@ -46,7 +46,7 @@ export default function CategoryForm() {
 
     const request = editing ? categoryApi.update(id, payload) : categoryApi.create(payload)
     request
-      .then(() => navigate('/categories'))
+      .then(() => navigate('/staff/categories'))
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -87,7 +87,7 @@ export default function CategoryForm() {
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/categories')} disabled={saving}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/staff/categories')} disabled={saving}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>

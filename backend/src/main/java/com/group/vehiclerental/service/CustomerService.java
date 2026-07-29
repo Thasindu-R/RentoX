@@ -54,42 +54,80 @@ public class CustomerService {
                 .findByFullNameContainingIgnoreCaseOrNicContainingIgnoreCase(query, query);
     }
 
-    public Customer create(Customer customer) {
-        if (customerRepository.existsByNic(customer.getNic())) {
-            throw new BusinessRuleException(
-                    "A customer with NIC " + customer.getNic() + " already exists");
-        }
-        if (customerRepository.existsByDrivingLicenceNo(customer.getDrivingLicenceNo())) {
-            throw new BusinessRuleException("A customer with licence number "
-                    + customer.getDrivingLicenceNo() + " already exists");
-        }
-        customer.setCustomerId(null);
-        return customerRepository.save(customer);
-    }
+    // There is no create() here on purpose. A customer record only comes into
+    // existence through the public sign-up form - see AuthService.signup().
 
+    /**
+     * Staff correcting a customer's details.
+     *
+     * Email and password are deliberately NOT updated here: the email is the
+     * customer's login identifier and the password is theirs alone. Staff can
+     * fix a name, phone, address, NIC or licence number.
+     */
     public Customer update(Integer id, Customer changes) {
         Customer existing = findById(id);
 
-        if (customerRepository.existsByNicAndCustomerIdNot(changes.getNic(), id)) {
-            throw new BusinessRuleException(
-                    "Another customer already uses NIC " + changes.getNic());
-        }
-        if (customerRepository.existsByDrivingLicenceNoAndCustomerIdNot(
-                changes.getDrivingLicenceNo(), id)) {
-            throw new BusinessRuleException("Another customer already uses licence number "
-                    + changes.getDrivingLicenceNo());
-        }
+        requireUniqueNic(changes.getNic(), id);
+        requireUniqueLicence(changes.getDrivingLicenceNo(), id);
 
         existing.setFullName(changes.getFullName());
-        existing.setNic(changes.getNic());
-        existing.setDrivingLicenceNo(changes.getDrivingLicenceNo());
-        existing.setEmail(changes.getEmail());
+        existing.setNic(blankToNull(changes.getNic()));
+        existing.setDrivingLicenceNo(blankToNull(changes.getDrivingLicenceNo()));
         existing.setPhone(changes.getPhone());
         existing.setAddress(changes.getAddress());
         if (changes.getRegisteredDate() != null) {
             existing.setRegisteredDate(changes.getRegisteredDate());
         }
         return customerRepository.save(existing);
+    }
+
+    /**
+     * Called by BookingService when a customer books a vehicle.
+     *
+     * Sign-up does not ask for licence details, so the rent form collects them
+     * and they land here. Once stored they are reused for later bookings, and
+     * the customer is only asked again if they change.
+     */
+    public Customer applyRentalDetails(Customer customer, String nic, String licenceNo) {
+        boolean changed = false;
+
+        if (nic != null && !nic.isBlank() && !nic.equals(customer.getNic())) {
+            requireUniqueNic(nic, customer.getCustomerId());
+            customer.setNic(nic.trim());
+            changed = true;
+        }
+        if (licenceNo != null && !licenceNo.isBlank()
+                && !licenceNo.equals(customer.getDrivingLicenceNo())) {
+            requireUniqueLicence(licenceNo, customer.getCustomerId());
+            customer.setDrivingLicenceNo(licenceNo.trim());
+            changed = true;
+        }
+
+        if (customer.getNic() == null || customer.getDrivingLicenceNo() == null) {
+            throw new BusinessRuleException(
+                    "NIC and driving licence number are required to rent a vehicle.");
+        }
+        return changed ? customerRepository.save(customer) : customer;
+    }
+
+    private void requireUniqueNic(String nic, Integer customerId) {
+        if (nic != null && !nic.isBlank()
+                && customerRepository.existsByNicAndCustomerIdNot(nic.trim(), customerId)) {
+            throw new BusinessRuleException("Another customer already uses NIC " + nic);
+        }
+    }
+
+    private void requireUniqueLicence(String licence, Integer customerId) {
+        if (licence != null && !licence.isBlank()
+                && customerRepository.existsByDrivingLicenceNoAndCustomerIdNot(
+                        licence.trim(), customerId)) {
+            throw new BusinessRuleException(
+                    "Another customer already uses licence number " + licence);
+        }
+    }
+
+    private String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 
     /**

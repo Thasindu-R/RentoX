@@ -1,6 +1,7 @@
 package com.group.vehiclerental.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,25 +40,35 @@ public class Customer {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @NotBlank(message = "NIC is required")
-    @Size(max = 20)
-    @Column(name = "nic", nullable = false, unique = true, length = 20)
-    private String nic;
-
-    @NotBlank(message = "Driving licence number is required")
-    @Size(max = 30)
-    @Column(name = "driving_licence_no", nullable = false, unique = true, length = 30)
-    private String drivingLicenceNo;
-
-    /**
-     * @Email allows null (an optional field) but rejects a non-empty value
-     * that is not a valid address. Pair it with @NotBlank if you later decide
-     * email should be mandatory.
-     */
+    /** The customer's login identifier, so it is required and unique. */
+    @NotBlank(message = "Email is required")
     @Email(message = "Email must be a valid address")
     @Size(max = 120)
-    @Column(name = "email", length = 120)
+    @Column(name = "email", nullable = false, unique = true, length = 120)
     private String email;
+
+    /**
+     * BCrypt hash, never the plain password.
+     *
+     * WRITE_ONLY means Jackson will read this field from an incoming request
+     * but never write it to a response, so a password hash can never leak out
+     * of the API even if a Customer is returned directly from a controller.
+     */
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "password", nullable = false, length = 100)
+    private String password;
+
+    /**
+     * NULL until the customer's first booking - the rent form collects the NIC
+     * and licence, so they cannot be required at sign-up.
+     */
+    @Size(max = 20)
+    @Column(name = "nic", unique = true, length = 20)
+    private String nic;
+
+    @Size(max = 30)
+    @Column(name = "driving_licence_no", unique = true, length = 30)
+    private String drivingLicenceNo;
 
     @NotBlank(message = "Phone number is required")
     @Size(max = 20)
@@ -83,13 +94,15 @@ public class Customer {
     public Customer() {
     }
 
-    public Customer(String fullName, String nic, String drivingLicenceNo, String email,
-                    String phone, String address, LocalDate registeredDate) {
+    public Customer(String fullName, String email, String password, String phone,
+                    String nic, String drivingLicenceNo, String address,
+                    LocalDate registeredDate) {
         this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
         this.nic = nic;
         this.drivingLicenceNo = drivingLicenceNo;
-        this.email = email;
-        this.phone = phone;
         this.address = address;
         this.registeredDate = registeredDate;
     }
@@ -136,6 +149,14 @@ public class Customer {
 
     public void setDrivingLicenceNo(String drivingLicenceNo) {
         this.drivingLicenceNo = drivingLicenceNo;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {

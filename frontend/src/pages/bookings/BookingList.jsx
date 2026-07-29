@@ -48,7 +48,7 @@ export default function BookingList() {
   const clearFilters = () => { setStatus(''); setFrom(''); setTo('') }
 
   const columns = [
-    { key: 'bookingId', header: '#', render: (b) => <Link to={`/bookings/${b.bookingId}`} className="cell-strong">#{b.bookingId}</Link> },
+    { key: 'bookingId', header: '#', render: (b) => <Link to={`/staff/bookings/${b.bookingId}`} className="cell-strong">#{b.bookingId}</Link> },
     {
       key: 'customer', header: 'Customer',
       render: (b) => (
@@ -100,7 +100,7 @@ export default function BookingList() {
           <h1>Bookings</h1>
           <p>Rental bookings. The total is calculated by the server from the dates and rates.</p>
         </div>
-        <Link to="/bookings/new" className="btn btn-primary">+ New Booking</Link>
+        <Link to="/staff/bookings/new" className="btn btn-primary">+ New Booking</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -135,8 +135,8 @@ export default function BookingList() {
           emptyText="Adjust the filters, or create a new booking."
           actions={(b) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/bookings/${b.bookingId}`)}>View</button>
-              <button className="btn-link" onClick={() => navigate(`/bookings/${b.bookingId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/bookings/${b.bookingId}`)}>View</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/bookings/${b.bookingId}/edit`)}>Edit</button>
               <button className="btn-link danger" onClick={() => setTarget(b)}>Delete</button>
             </>
           )}

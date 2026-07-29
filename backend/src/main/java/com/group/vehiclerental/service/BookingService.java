@@ -45,15 +45,18 @@ public class BookingService {
     private final CustomerRepository customerRepository;
     private final VehicleRepository vehicleRepository;
     private final DriverRepository driverRepository;
+    private final CustomerService customerService;
 
     public BookingService(BookingRepository bookingRepository,
                           CustomerRepository customerRepository,
                           VehicleRepository vehicleRepository,
-                          DriverRepository driverRepository) {
+                          DriverRepository driverRepository,
+                          CustomerService customerService) {
         this.bookingRepository = bookingRepository;
         this.customerRepository = customerRepository;
         this.vehicleRepository = vehicleRepository;
         this.driverRepository = driverRepository;
+        this.customerService = customerService;
     }
 
     @Transactional(readOnly = true)
@@ -174,6 +177,12 @@ public class BookingService {
     private void applyRequest(Booking booking, BookingRequest request, Integer excludeBookingId) {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Customer", request.getCustomerId()));
+
+        // The rent form supplies NIC and licence. This stores them on the
+        // customer the first time, and refuses the booking if we still do not
+        // have them - you cannot rent a vehicle without a driving licence.
+        customer = customerService.applyRentalDetails(
+                customer, request.getNic(), request.getDrivingLicenceNo());
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle", request.getVehicleId()));
 

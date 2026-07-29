@@ -3,12 +3,10 @@ package com.group.vehiclerental.controller;
 import com.group.vehiclerental.model.Customer;
 import com.group.vehiclerental.service.CustomerService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +20,10 @@ import java.util.List;
  *
  * GET    /api/customers          list all, or ?search=nimal
  * GET    /api/customers/{id}     one customer
- * POST   /api/customers          create
- * PUT    /api/customers/{id}     update
+ * PUT    /api/customers/{id}     update (staff correcting details)
  * DELETE /api/customers/{id}     delete
+ *
+ * Creating a customer is NOT here - see POST /api/auth/signup.
  */
 @RestController
 @RequestMapping("/api/customers")
@@ -46,16 +45,9 @@ public class CustomerController {
         return customerService.findById(id);
     }
 
-    /**
-     * @Valid switches on the Bean Validation annotations in the Customer entity.
-     * A failure never reaches this method - Spring throws, and
-     * GlobalExceptionHandler turns it into a 400 with a field-by-field message.
-     */
-    @PostMapping
-    public ResponseEntity<Customer> create(@Valid @RequestBody Customer customer) {
-        Customer saved = customerService.create(customer);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
+    // There is deliberately no POST here. Customers create their own account
+    // through POST /api/auth/signup - staff cannot add them. Staff can still
+    // view, correct and remove customer records below.
 
     @PutMapping("/{id}")
     public Customer update(@PathVariable Integer id, @Valid @RequestBody Customer customer) {

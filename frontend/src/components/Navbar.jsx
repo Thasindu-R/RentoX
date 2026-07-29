@@ -25,22 +25,22 @@ function Icon({ name }) {
 }
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: 'dashboard', end: true },
+  { to: '/staff', label: 'Dashboard', icon: 'dashboard', end: true },
   { section: 'Records' },
-  { to: '/customers', label: 'Customers', icon: 'customers' },
-  { to: '/categories', label: 'Categories', icon: 'categories' },
-  { to: '/vehicles', label: 'Vehicles', icon: 'vehicles' },
-  { to: '/drivers', label: 'Drivers', icon: 'drivers' },
+  { to: '/staff/customers', label: 'Customers', icon: 'customers' },
+  { to: '/staff/categories', label: 'Categories', icon: 'categories' },
+  { to: '/staff/vehicles', label: 'Vehicles', icon: 'vehicles' },
+  { to: '/staff/drivers', label: 'Drivers', icon: 'drivers' },
   { section: 'Operations' },
-  { to: '/bookings', label: 'Bookings', icon: 'bookings' },
-  { to: '/payments', label: 'Payments', icon: 'payments' },
+  { to: '/staff/bookings', label: 'Bookings', icon: 'bookings' },
+  { to: '/staff/payments', label: 'Payments', icon: 'payments' },
 ]
 
 /** Page title shown in the top bar, derived from the current URL. */
 function titleFor(pathname) {
-  if (pathname === '/') return 'Dashboard'
-  const seg = pathname.split('/')[1] || ''
-  const item = NAV.find((n) => n.to === '/' + seg)
+  if (pathname === '/staff') return 'Dashboard'
+  const seg = pathname.split('/')[2] || ''
+  const item = NAV.find((n) => n.to === '/staff/' + seg)
   return item ? item.label : 'RentoX'
 }
 
@@ -50,7 +50,7 @@ export default function Navbar({ children, user, onLogout }) {
 
   const logout = () => {
     onLogout()
-    navigate('/login', { replace: true })
+    navigate('/staff/login', { replace: true })
   }
 
   return (
@@ -85,6 +85,9 @@ export default function Navbar({ children, user, onLogout }) {
         </nav>
 
         <div className="sidebar-footer">
+          <a href="/" className="btn btn-secondary btn-sm" style={{ width: '100%', marginBottom: 8 }}>
+            View public site
+          </a>
           <button className="btn btn-secondary btn-sm" style={{ width: '100%' }} onClick={logout}>
             Sign out
           </button>

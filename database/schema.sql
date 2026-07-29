@@ -18,19 +18,30 @@ USE vehicle_rental_db;
 -- ---------------------------------------------------------------------
 --  1. customer  -- people who rent vehicles
 -- ---------------------------------------------------------------------
+-- Customers create their own account through the public sign-up form; staff
+-- cannot add them. Sign-up captures name, email, phone and password.
+--
+-- nic and driving_licence_no are NULL until the customer makes their first
+-- booking - the rent form collects them and fills them in. They stay UNIQUE:
+-- MySQL allows any number of NULLs in a UNIQUE index, so several customers can
+-- sit at NULL while no two real NICs can ever collide.
 CREATE TABLE customer (
     customer_id         INT AUTO_INCREMENT PRIMARY KEY,
     full_name           VARCHAR(100)  NOT NULL,
-    nic                 VARCHAR(20)   NOT NULL,
-    driving_licence_no  VARCHAR(30)   NOT NULL,
-    email               VARCHAR(120),
+    email               VARCHAR(120)  NOT NULL,
+    password            VARCHAR(100)  NOT NULL,
     phone               VARCHAR(20)   NOT NULL,
+    nic                 VARCHAR(20)   NULL,
+    driving_licence_no  VARCHAR(30)   NULL,
     address             VARCHAR(255),
     registered_date     DATE          NOT NULL DEFAULT (CURRENT_DATE),
 
+    CONSTRAINT uq_customer_email   UNIQUE (email),
     CONSTRAINT uq_customer_nic     UNIQUE (nic),
     CONSTRAINT uq_customer_licence UNIQUE (driving_licence_no)
 ) ENGINE = InnoDB;
+
+CREATE INDEX idx_customer_email ON customer (email);
 
 CREATE INDEX idx_customer_full_name ON customer (full_name);
 
@@ -65,6 +76,10 @@ CREATE TABLE vehicle (
     transmission         VARCHAR(20),
     category_id          INT          NOT NULL,
     status               VARCHAR(20)  NOT NULL DEFAULT 'AVAILABLE',
+    -- File name of the uploaded photo, e.g. "vehicle-1-a3f9.jpg". Only the
+    -- name is stored; the file itself lives in backend/uploads/ and is served
+    -- at /uploads/<name>. Storing images in the database is avoided.
+    image_path           VARCHAR(255) NULL,
 
     CONSTRAINT uq_vehicle_reg_no UNIQUE (registration_number),
 

@@ -52,8 +52,18 @@ export default function CustomerList() {
         </>
       ),
     },
-    { key: 'nic', header: 'NIC', render: (c) => <span className="mono">{c.nic}</span> },
-    { key: 'drivingLicenceNo', header: 'Licence', render: (c) => <span className="mono">{c.drivingLicenceNo}</span> },
+    {
+      key: 'nic', header: 'NIC',
+      render: (c) => c.nic
+        ? <span className="mono">{c.nic}</span>
+        : <span className="cell-sub">Not provided yet</span>,
+    },
+    {
+      key: 'drivingLicenceNo', header: 'Licence',
+      render: (c) => c.drivingLicenceNo
+        ? <span className="mono">{c.drivingLicenceNo}</span>
+        : <span className="cell-sub">—</span>,
+    },
     { key: 'phone', header: 'Phone' },
     { key: 'address', header: 'Address' },
     { key: 'registeredDate', header: 'Registered' },
@@ -64,9 +74,11 @@ export default function CustomerList() {
       <div className="page-head">
         <div>
           <h1>Customers</h1>
-          <p>People who rent vehicles from us.</p>
+          <p>Registered through the public sign-up form.</p>
         </div>
-        <Link to="/customers/new" className="btn btn-primary">+ Add Customer</Link>
+        <span className="cell-sub" style={{ maxWidth: 280, textAlign: 'right' }}>
+          Customers register themselves on the public site — staff cannot add them.
+        </span>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -91,10 +103,10 @@ export default function CustomerList() {
           loading={loading}
           rowKey={(c) => c.customerId}
           emptyTitle={search ? 'No matches' : 'No customers yet'}
-          emptyText={search ? 'Try a different name or NIC.' : 'Add your first customer to get started.'}
+          emptyText={search ? 'Try a different name or NIC.' : 'Customers appear here once they sign up on the public site.'}
           actions={(c) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/customers/${c.customerId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => navigate(`/staff/customers/${c.customerId}/edit`)}>Edit</button>
               <button className="btn-link danger" onClick={() => setTarget(c)}>Delete</button>
             </>
           )}
