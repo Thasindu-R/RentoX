@@ -1,5 +1,6 @@
 package com.group.vehiclerental.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -112,11 +113,14 @@ public class Booking {
      * cascade = ALL with orphanRemoval mirrors the SQL ON DELETE CASCADE:
      * deleting a booking deletes its payments.
      *
-     * Not @JsonIgnore here - the payments of a booking are genuinely useful in
-     * the booking detail view. Recursion is prevented on the other side, where
-     * Payment.booking is annotated to skip its "payments" field.
+     * @JsonIgnore because this collection is LAZY and spring.jpa.open-in-view
+     * is false: by the time Jackson builds the JSON the database session has
+     * closed, so serialising it would throw LazyInitializationException.
+     * The booking detail screen loads them from GET /api/payments/booking/{id}
+     * instead, which is the cleaner REST shape anyway.
      */
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Payment> payments = new ArrayList<>();
 
     public Booking() {

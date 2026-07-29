@@ -45,15 +45,17 @@ public class Payment {
      * to every row. EAGER here would load a booking (and everything the
      * booking eagerly needs) for every single payment row.
      *
-     * "payments" is listed in @JsonIgnoreProperties to break the cycle:
-     * Booking serialises its payments, so each Payment must not serialise its
-     * booking's payments again.
+     * The ignore list keeps a payment's JSON to the booking's own columns
+     * (id, dates, total, status). Its customer/vehicle/driver are LAZY and
+     * would throw LazyInitializationException once the session has closed,
+     * and "payments" would be a cycle straight back here.
      */
     @NotNull(message = "Booking is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false,
                 foreignKey = @ForeignKey(name = "fk_payment_booking"))
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "payments"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler",
+                           "payments", "customer", "vehicle", "driver"})
     private Booking booking;
 
     @NotNull(message = "Amount is required")
