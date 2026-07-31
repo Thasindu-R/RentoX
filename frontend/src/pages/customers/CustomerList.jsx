@@ -76,9 +76,6 @@ export default function CustomerList() {
           <h1>Customers</h1>
           <p>Registered through the public sign-up form.</p>
         </div>
-        <span className="cell-sub" style={{ maxWidth: 280, textAlign: 'right' }}>
-          Customers register themselves on the public site — staff cannot add them.
-        </span>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
