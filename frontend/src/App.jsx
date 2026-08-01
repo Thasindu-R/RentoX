@@ -14,7 +14,6 @@ import MyBookings from './pages/public/MyBookings.jsx'
 // Staff area
 import Dashboard from './pages/Dashboard.jsx'
 import CustomerList from './pages/customers/CustomerList.jsx'
-import CustomerForm from './pages/customers/CustomerForm.jsx'
 import CategoryList from './pages/categories/CategoryList.jsx'
 import CategoryForm from './pages/categories/CategoryForm.jsx'
 import VehicleList from './pages/vehicles/VehicleList.jsx'
@@ -89,9 +88,8 @@ export default function App() {
         <Routes>
           <Route path="/staff" element={<Dashboard />} />
 
-          {/* No "new customer" route - customers sign up themselves. */}
+          {/* Customers sign up and maintain their own details - staff only look. */}
           <Route path="/staff/customers" element={<CustomerList />} />
-          <Route path="/staff/customers/:id/edit" element={<CustomerForm />} />
 
           <Route path="/staff/categories" element={<CategoryList />} />
           <Route path="/staff/categories/new" element={<CategoryForm />} />
