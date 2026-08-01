@@ -121,8 +121,7 @@ export default function Browse({ customer }) {
         <div className="hero-inner">
           <h1>Rent a vehicle across Sri Lanka</h1>
           <p>
-            Browse the fleet and see our daily rates — no account needed.
-            Create one when you are ready to book.
+            Browse the fleet and see our daily rates.
           </p>
           {!customer && (
             <div className="hero-actions">
