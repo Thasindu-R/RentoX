@@ -126,8 +126,9 @@ export default function Browse({ customer }) {
           </p>
           {!customer && (
             <div className="hero-actions">
+              {/* Signing in is already offered in the header, so the hero
+                  carries a single call to action. */}
               <Link to="/signup" className="btn btn-primary">Create an account</Link>
-              <Link to="/login" className="btn btn-secondary">Sign in</Link>
             </div>
           )}
         </div>
