@@ -12,7 +12,6 @@ import RentForm from './pages/public/RentForm.jsx'
 import MyBookings from './pages/public/MyBookings.jsx'
 
 // Staff area
-import StaffLogin from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import CustomerList from './pages/customers/CustomerList.jsx'
 import CustomerForm from './pages/customers/CustomerForm.jsx'
@@ -38,6 +37,9 @@ const CUSTOMER_KEY = 'rentox.customer'
  *              password against a BCrypt hash.
  *   staff    - the single hardcoded admin account from the project scope,
  *              checked in the browser.
+ *
+ * Both are entered through the same form at /login, which decides which of the
+ * two a given set of credentials belongs to and routes accordingly.
  *
  * Neither is real security: the API itself is unauthenticated, so these only
  * decide what the UI shows. Locking the API down would mean adding Spring
@@ -73,18 +75,18 @@ export default function App() {
 
   /* ---------------- Staff area: /staff/** ---------------- */
   if (location.pathname.startsWith('/staff')) {
+    // Not signed in as admin: there is no separate staff form to fall back to,
+    // so send them to the one public sign-in page.
     if (!staff) {
       return (
         <Routes>
-          <Route path="/staff/login" element={<StaffLogin onLogin={loginStaff} />} />
-          <Route path="*" element={<Navigate to="/staff/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       )
     }
     return (
       <Navbar user={staff} onLogout={logoutStaff}>
         <Routes>
-          <Route path="/staff/login" element={<Navigate to="/staff" replace />} />
           <Route path="/staff" element={<Dashboard />} />
 
           {/* No "new customer" route - customers sign up themselves. */}
@@ -125,7 +127,18 @@ export default function App() {
         {/* Anyone can browse the fleet and see prices without an account. */}
         <Route path="/" element={<Browse customer={customer} />} />
         <Route path="/signup" element={<Signup onLogin={loginCustomer} customer={customer} />} />
-        <Route path="/login" element={<CustomerLogin onLogin={loginCustomer} customer={customer} />} />
+        {/* Admins sign in here too - the form routes them to /staff. */}
+        <Route
+          path="/login"
+          element={
+            <CustomerLogin
+              onLogin={loginCustomer}
+              onStaffLogin={loginStaff}
+              customer={customer}
+              staff={staff}
+            />
+          }
+        />
 
         {/* Renting requires an account - RentForm redirects to /signup itself. */}
         <Route path="/rent/:vehicleId" element={<RentForm customer={customer} />} />

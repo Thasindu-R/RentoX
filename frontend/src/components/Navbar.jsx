@@ -50,7 +50,7 @@ export default function Navbar({ children, user, onLogout }) {
 
   const logout = () => {
     onLogout()
-    navigate('/staff/login', { replace: true })
+    navigate('/login', { replace: true })
   }
 
   return (
