@@ -7,6 +7,7 @@ import com.group.vehiclerental.repository.BookingRepository;
 import com.group.vehiclerental.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,15 +23,18 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final BookingRepository bookingRepository;
+    private final ImageStorageService imageStorage;
 
     /**
      * Constructor injection. Spring sees one constructor and passes the beans
      * in automatically - no @Autowired annotation needed since Spring 4.3.
      */
     public CustomerService(CustomerRepository customerRepository,
-                           BookingRepository bookingRepository) {
+                           BookingRepository bookingRepository,
+                           ImageStorageService imageStorage) {
         this.customerRepository = customerRepository;
         this.bookingRepository = bookingRepository;
+        this.imageStorage = imageStorage;
     }
 
     @Transactional(readOnly = true)
@@ -67,9 +71,15 @@ public class CustomerService {
     public Customer update(Integer id, Customer changes) {
         Customer existing = findById(id);
 
+        requireUniqueEmail(changes.getEmail(), id);
         requireUniqueNic(changes.getNic(), id);
         requireUniqueLicence(changes.getDrivingLicenceNo(), id);
 
+        // The email is the customer's login, so it moves with the account when
+        // they change it here. The password is untouched either way.
+        if (changes.getEmail() != null && !changes.getEmail().isBlank()) {
+            existing.setEmail(changes.getEmail().trim());
+        }
         existing.setFullName(changes.getFullName());
         existing.setNic(blankToNull(changes.getNic()));
         existing.setDrivingLicenceNo(blankToNull(changes.getDrivingLicenceNo()));
@@ -108,6 +118,32 @@ public class CustomerService {
                     "NIC and driving licence number are required to rent a vehicle.");
         }
         return changed ? customerRepository.save(customer) : customer;
+    }
+
+    /**
+     * The customer's own photo. Stored the same way as a vehicle's: the file
+     * goes to backend/uploads/ and only its name is kept on the row.
+     */
+    public Customer storePhoto(Integer id, MultipartFile file) {
+        Customer customer = findById(id);
+        String filename = imageStorage.store("customer", id, file);
+        imageStorage.delete(customer.getImagePath());
+        customer.setImagePath(filename);
+        return customerRepository.save(customer);
+    }
+
+    public Customer removePhoto(Integer id) {
+        Customer customer = findById(id);
+        imageStorage.delete(customer.getImagePath());
+        customer.setImagePath(null);
+        return customerRepository.save(customer);
+    }
+
+    private void requireUniqueEmail(String email, Integer customerId) {
+        if (email != null && !email.isBlank()
+                && customerRepository.existsByEmailIgnoreCaseAndCustomerIdNot(email.trim(), customerId)) {
+            throw new BusinessRuleException("Another account already uses the email " + email);
+        }
     }
 
     private void requireUniqueNic(String nic, Integer customerId) {
