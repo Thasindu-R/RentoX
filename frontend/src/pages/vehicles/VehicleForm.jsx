@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   categoryApi, FUEL_TYPES, parseError, TRANSMISSIONS, vehicleApi,
   vehicleImageUrl, VEHICLE_STATUSES,
@@ -15,6 +15,7 @@ export default function VehicleForm() {
   const { id } = useParams()
   const editing = Boolean(id)
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [form, setForm] = useState(EMPTY)
   const [categories, setCategories] = useState([])
@@ -25,10 +26,25 @@ export default function VehicleForm() {
   const [photoUrl, setPhotoUrl] = useState(null)
   const [photoBusy, setPhotoBusy] = useState(false)
 
+  // A new vehicle has no id yet, so its photo is held here until it does.
+  const [photoFile, setPhotoFile] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
+
+  /**
+   * Carried over when a vehicle was created but its photo failed to upload, so
+   * the message survives the redirect onto that vehicle - see submit().
+   */
+  useEffect(() => {
+    if (location.state?.photoError) setError(location.state.photoError)
+  }, [location.state])
+
   useEffect(() => {
     const jobs = [categoryApi.list().then(setCategories)]
 
     if (editing) {
+      // Anything picked on the create form belongs to the vehicle now saved.
+      setPhotoFile(null)
+      setPhotoPreview(null)
       // The API returns a nested category object; the form works with the id.
       jobs.push(
         vehicleApi.get(id).then((v) => {
@@ -81,6 +97,26 @@ export default function VehicleForm() {
       .finally(() => setPhotoBusy(false))
   }
 
+  /** Creating: nothing to upload to yet, so just keep the file and preview it. */
+  const onPickNewPhoto = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
+  const onClearNewPhoto = () => {
+    setPhotoFile(null)
+    setPhotoPreview(null)
+  }
+
+  // Releases the previous preview when it is replaced, and on unmount.
+  useEffect(() => {
+    if (!photoPreview) return undefined
+    return () => URL.revokeObjectURL(photoPreview)
+  }, [photoPreview])
+
   const submit = (e) => {
     e.preventDefault()
     setSaving(true)
@@ -97,7 +133,23 @@ export default function VehicleForm() {
 
     const request = editing ? vehicleApi.update(id, payload) : vehicleApi.create(payload)
     request
-      .then(() => navigate('/staff/vehicles'))
+      .then((saved) => {
+        if (editing || !photoFile) {
+          navigate('/staff/vehicles')
+          return undefined
+        }
+        // The vehicle now has an id, so the photo has somewhere to go.
+        return vehicleApi.uploadPhoto(saved.vehicleId, photoFile)
+          .then(() => navigate('/staff/vehicles'))
+          .catch((err) => {
+            // The vehicle itself was created. Send them to it rather than
+            // leaving a create form that would make a second one on resubmit.
+            navigate(`/staff/vehicles/${saved.vehicleId}/edit`, {
+              replace: true,
+              state: { photoError: `The vehicle was created, but its photo did not upload: ${parseError(err).message}` },
+            })
+          })
+      })
       .catch((err) => {
         const parsed = parseError(err)
         setError(parsed.message)
@@ -109,6 +161,12 @@ export default function VehicleForm() {
   if (loading) {
     return <div className="card"><div className="state"><div className="spinner" /></div></div>
   }
+
+  // Editing shows what the server holds; creating shows the pending file.
+  const shownPhoto = editing ? photoUrl : photoPreview
+  const pickLabel = editing
+    ? (photoBusy ? 'Uploading…' : photoUrl ? 'Replace photo' : 'Upload photo')
+    : (photoPreview ? 'Choose a different photo' : 'Choose photo')
 
   return (
     <>
@@ -156,27 +214,29 @@ export default function VehicleForm() {
               Shown to customers on the public browse page. JPG, PNG, WEBP or GIF, up to 5 MB.
             </p>
 
-            {editing ? (
-              <div className="photo-editor">
-                {photoUrl
-                  ? <img className="photo-preview" src={photoUrl} alt="Vehicle" />
-                  : <div className="photo-preview empty">No photo</div>}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
-                    {photoBusy ? 'Uploading…' : photoUrl ? 'Replace photo' : 'Upload photo'}
-                    <input type="file" accept="image/*" onChange={onPickPhoto}
-                           disabled={photoBusy} style={{ display: 'none' }} />
-                  </label>
-                  {photoUrl && (
-                    <button type="button" className="btn-link danger" onClick={onRemovePhoto} disabled={photoBusy}>
-                      Remove photo
-                    </button>
-                  )}
-                </div>
+            <div className="photo-editor">
+              {shownPhoto
+                ? <img className="photo-preview" src={shownPhoto} alt="Vehicle" />
+                : <div className="photo-preview empty">No photo</div>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
+                  {pickLabel}
+                  <input type="file" accept="image/*" onChange={editing ? onPickPhoto : onPickNewPhoto}
+                         disabled={photoBusy || saving} style={{ display: 'none' }} />
+                </label>
+                {shownPhoto && (
+                  <button type="button" className="btn-link danger"
+                          onClick={editing ? onRemovePhoto : onClearNewPhoto}
+                          disabled={photoBusy || saving}>
+                    Remove photo
+                  </button>
+                )}
               </div>
-            ) : (
-              <div className="field-hint">
-                Save the vehicle first — then reopen it to upload a photo.
+            </div>
+
+            {!editing && photoFile && (
+              <div className="field-hint" style={{ marginTop: 10 }}>
+                Uploaded when you create the vehicle.
               </div>
             )}
           </div>
