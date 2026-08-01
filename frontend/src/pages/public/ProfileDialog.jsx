@@ -97,7 +97,7 @@ export default function ProfileDialog({ customer, onClose, onUpdated }) {
     <div className="modal-backdrop" onClick={busy ? undefined : onClose}>
       <div className="modal wide" onClick={(e) => e.stopPropagation()}>
         <h3>My account</h3>
-        <p>The details we hold for you. Your bookings are under My Bookings.</p>
+        <p>The details we hold for you.</p>
 
         <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
 
