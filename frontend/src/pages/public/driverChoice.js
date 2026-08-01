@@ -37,14 +37,16 @@ export async function saveWithDriverChoice(save, payload, choice, drivers) {
     throw new Error('No drivers are available at the moment. Choose Self Drive, or contact us.')
   }
 
-  let lastError
   for (const driver of drivers) {
     try {
       return await save({ ...payload, driverId: driver.driverId })
     } catch (err) {
-      lastError = err
       if (!/driver/i.test(parseError(err).message)) throw err
     }
   }
-  throw lastError
+
+  // Everyone on the roster clashes with these dates. The server's message names
+  // whichever driver was tried last, which would be a stranger to the customer -
+  // they asked for a driver, not for anyone in particular.
+  throw new Error('No driver is free for those dates. Try different dates, or choose Self Drive.')
 }
