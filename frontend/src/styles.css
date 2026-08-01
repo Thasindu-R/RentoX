@@ -497,8 +497,28 @@ table.data th.num { text-align: right; }
 .site-link.active { color: var(--accent); background: var(--accent-soft); }
 
 .site-actions { margin-left: auto; display: flex; align-items: center; gap: 9px; }
-.site-user { display: flex; align-items: center; gap: 8px; }
+/* A button now - it opens the account dialog - but it should still read as
+   plain header text rather than a control. */
+.site-user {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: none; padding: 4px 6px; margin: 0;
+  border-radius: var(--radius-sm); cursor: pointer; color: inherit; font: inherit;
+}
+.site-user:hover { background: var(--grey-soft); }
 .site-user-name { font-size: 13px; font-weight: 550; }
+img.avatar { object-fit: cover; }
+
+/* Account dialog */
+.profile-photo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.profile-photo {
+  width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+  background: var(--grey-soft); flex-shrink: 0;
+}
+.profile-photo.empty {
+  display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent);
+  font-weight: 650; font-size: 26px;
+}
 
 .site-main { flex: 1; }
 .site-content { max-width: 1180px; margin: 0 auto; padding: 24px 22px 48px; width: 100%; }

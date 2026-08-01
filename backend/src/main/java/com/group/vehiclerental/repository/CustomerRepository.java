@@ -31,6 +31,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     boolean existsByDrivingLicenceNo(String drivingLicenceNo);
 
     /** "...AndCustomerIdNot" excludes the record being edited during an update. */
+    boolean existsByEmailIgnoreCaseAndCustomerIdNot(String email, Integer customerId);
+
     boolean existsByNicAndCustomerIdNot(String nic, Integer customerId);
 
     boolean existsByDrivingLicenceNoAndCustomerIdNot(String drivingLicenceNo, Integer customerId);

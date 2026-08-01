@@ -10,6 +10,7 @@ import Signup from './pages/public/Signup.jsx'
 import CustomerLogin from './pages/public/CustomerLogin.jsx'
 import RentForm from './pages/public/RentForm.jsx'
 import MyBookings from './pages/public/MyBookings.jsx'
+import ProfileDialog from './pages/public/ProfileDialog.jsx'
 
 // Staff area
 import Dashboard from './pages/Dashboard.jsx'
@@ -49,6 +50,7 @@ export default function App() {
     return raw ? JSON.parse(raw) : null
   })
   const [staff, setStaff] = useState(() => localStorage.getItem(STAFF_KEY))
+  const [profileOpen, setProfileOpen] = useState(false)
   const location = useLocation()
 
   const loginCustomer = useCallback((c) => {
@@ -119,7 +121,8 @@ export default function App() {
 
   /* ---------------- Public site ---------------- */
   return (
-    <PublicHeader customer={customer} onLogout={logoutCustomer}>
+    <PublicHeader customer={customer} onLogout={logoutCustomer}
+                  onOpenProfile={() => setProfileOpen(true)}>
       <Routes>
         {/* Anyone can browse the fleet and see prices without an account. */}
         <Route path="/" element={<Browse customer={customer} />} />
@@ -143,6 +146,16 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* Editing their own details refreshes the stored session, so the header
+          and anything reading `customer` follow along immediately. */}
+      {profileOpen && customer && (
+        <ProfileDialog
+          customer={customer}
+          onClose={() => setProfileOpen(false)}
+          onUpdated={loginCustomer}
+        />
+      )}
     </PublicHeader>
   )
 }

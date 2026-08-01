@@ -1,6 +1,5 @@
 package com.group.vehiclerental.service;
 
-import com.group.vehiclerental.config.FileStorageConfig;
 import com.group.vehiclerental.dto.VehicleRequest;
 import com.group.vehiclerental.exception.BusinessRuleException;
 import com.group.vehiclerental.exception.ResourceNotFoundException;
@@ -14,14 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Module 3 - Vehicle Management.
@@ -36,13 +29,16 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final CategoryRepository categoryRepository;
     private final BookingRepository bookingRepository;
+    private final ImageStorageService imageStorage;
 
     public VehicleService(VehicleRepository vehicleRepository,
                           CategoryRepository categoryRepository,
-                          BookingRepository bookingRepository) {
+                          BookingRepository bookingRepository,
+                          ImageStorageService imageStorage) {
         this.vehicleRepository = vehicleRepository;
         this.categoryRepository = categoryRepository;
         this.bookingRepository = bookingRepository;
+        this.imageStorage = imageStorage;
     }
 
     @Transactional(readOnly = true)
@@ -122,15 +118,9 @@ public class VehicleService {
             throw new BusinessRuleException("Cannot delete vehicle "
                     + vehicle.getRegistrationNumber() + " because it has bookings against it");
         }
-        deletePhotoFile(vehicle.getImagePath());
+        imageStorage.delete(vehicle.getImagePath());
         vehicleRepository.delete(vehicle);
     }
-
-    /** Image types we accept. Anything else is rejected before we touch disk. */
-    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS =
-            Set.of("jpg", "jpeg", "png", "webp", "gif");
-
-    private static final long MAX_IMAGE_BYTES = 5L * 1024 * 1024;   // 5 MB
 
     /**
      * Stores an uploaded photo for a vehicle.
@@ -141,71 +131,17 @@ public class VehicleService {
      */
     public Vehicle storePhoto(Integer id, MultipartFile file) {
         Vehicle vehicle = findById(id);
-
-        if (file == null || file.isEmpty()) {
-            throw new BusinessRuleException("No image file was uploaded");
-        }
-        if (file.getSize() > MAX_IMAGE_BYTES) {
-            throw new BusinessRuleException("Image must be 5 MB or smaller");
-        }
-
-        String extension = extensionOf(file.getOriginalFilename());
-        if (!ALLOWED_IMAGE_EXTENSIONS.contains(extension)) {
-            throw new BusinessRuleException(
-                    "Image must be one of " + ALLOWED_IMAGE_EXTENSIONS + " but was ." + extension);
-        }
-
-        // A generated name, never the name the browser sent. A crafted filename
-        // like "../../application.properties" could otherwise escape the folder.
-        String filename = "vehicle-" + id + "-" + UUID.randomUUID().toString().substring(0, 8)
-                + "." + extension;
-
-        try {
-            Path dir = FileStorageConfig.UPLOAD_DIR;
-            Files.createDirectories(dir);
-            Path target = dir.resolve(filename).normalize();
-            if (!target.startsWith(dir)) {
-                throw new BusinessRuleException("Invalid image file name");
-            }
-            try (var in = file.getInputStream()) {
-                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (IOException e) {
-            throw new BusinessRuleException("Could not save the image: " + e.getMessage());
-        }
-
-        deletePhotoFile(vehicle.getImagePath());
+        String filename = imageStorage.store("vehicle", id, file);
+        imageStorage.delete(vehicle.getImagePath());
         vehicle.setImagePath(filename);
         return vehicleRepository.save(vehicle);
     }
 
     public Vehicle removePhoto(Integer id) {
         Vehicle vehicle = findById(id);
-        deletePhotoFile(vehicle.getImagePath());
+        imageStorage.delete(vehicle.getImagePath());
         vehicle.setImagePath(null);
         return vehicleRepository.save(vehicle);
-    }
-
-    private void deletePhotoFile(String filename) {
-        if (filename == null || filename.isBlank()) {
-            return;
-        }
-        try {
-            Path existing = FileStorageConfig.UPLOAD_DIR.resolve(filename).normalize();
-            if (existing.startsWith(FileStorageConfig.UPLOAD_DIR)) {
-                Files.deleteIfExists(existing);
-            }
-        } catch (IOException ignored) {
-            // A leftover file is not worth failing the request over.
-        }
-    }
-
-    private String extensionOf(String originalName) {
-        if (originalName == null || !originalName.contains(".")) {
-            return "";
-        }
-        return originalName.substring(originalName.lastIndexOf('.') + 1)
-                .toLowerCase(Locale.ROOT).trim();
     }
 
     @Transactional(readOnly = true)

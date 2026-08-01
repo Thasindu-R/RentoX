@@ -1,4 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { customerImageUrl } from '../api.js'
 
 /**
  * Header for the public site. Deliberately different from the staff sidebar:
@@ -7,8 +8,9 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
  * The whole public site is browsable without an account - only the sign-in
  * state of the right-hand side changes.
  */
-export default function PublicHeader({ customer, onLogout, children }) {
+export default function PublicHeader({ customer, onLogout, onOpenProfile, children }) {
   const navigate = useNavigate()
+  const photo = customerImageUrl(customer)
 
   const logout = () => {
     onLogout()
@@ -45,10 +47,13 @@ export default function PublicHeader({ customer, onLogout, children }) {
           <div className="site-actions">
             {customer ? (
               <>
-                <span className="site-user">
-                  <span className="avatar">{(customer.fullName || 'C').slice(0, 1).toUpperCase()}</span>
+                <button type="button" className="site-user" onClick={onOpenProfile}
+                        title="Your account details">
+                  {photo
+                    ? <img className="avatar" src={photo} alt="" />
+                    : <span className="avatar">{(customer.fullName || 'C').slice(0, 1).toUpperCase()}</span>}
                   <span className="site-user-name">{customer.fullName}</span>
-                </span>
+                </button>
                 <button className="btn btn-secondary btn-sm" onClick={logout}>Sign out</button>
               </>
             ) : (

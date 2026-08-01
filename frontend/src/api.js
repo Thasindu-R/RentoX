@@ -51,6 +51,11 @@ export function vehicleImageUrl(vehicle) {
   return vehicle?.imagePath ? `${SERVER_URL}/uploads/${vehicle.imagePath}` : null
 }
 
+/** Same folder, same arrangement - customers keep a photo too. */
+export function customerImageUrl(customer) {
+  return customer?.imagePath ? `${SERVER_URL}/uploads/${customer.imagePath}` : null
+}
+
 /* ------------------------------------------------------------------ */
 /*  Public authentication - customers only                            */
 /* ------------------------------------------------------------------ */
@@ -67,6 +72,15 @@ export const customerApi = {
   get: (id) => http.get(`/customers/${id}`).then(body),
   // No create() on purpose - customers sign up via authApi.signup.
   update: (id, data) => http.put(`/customers/${id}`, data).then(body),
+  /** Multipart, like the vehicle one - see vehicleApi.uploadPhoto. */
+  uploadPhoto: (id, file) => {
+    const form = new FormData()
+    form.append('file', file)
+    return http.post(`/customers/${id}/photo`, form, {
+      headers: { 'Content-Type': undefined },
+    }).then(body)
+  },
+  removePhoto: (id) => http.delete(`/customers/${id}/photo`).then(body),
   remove: (id) => http.delete(`/customers/${id}`).then(body),
   count: () => http.get('/customers/count').then(body),
 }

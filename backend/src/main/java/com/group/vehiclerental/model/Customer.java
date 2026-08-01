@@ -83,6 +83,14 @@ public class Customer {
     private LocalDate registeredDate;
 
     /**
+     * File name of the customer's photo in backend/uploads/, or NULL. Same
+     * arrangement as Vehicle: the row keeps the name, never the bytes.
+     */
+    @Size(max = 255)
+    @Column(name = "image_path", length = 255)
+    private String imagePath;
+
+    /**
      * Inverse side. mappedBy = "customer" refers to the Booking.customer field,
      * which owns the customer_id foreign key. @JsonIgnore breaks the
      * Customer -> Booking -> Customer serialisation cycle.
@@ -189,6 +197,14 @@ public class Customer {
 
     public void setRegisteredDate(LocalDate registeredDate) {
         this.registeredDate = registeredDate;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public List<Booking> getBookings() {
