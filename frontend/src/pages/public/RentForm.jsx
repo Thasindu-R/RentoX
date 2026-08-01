@@ -4,6 +4,7 @@ import {
   bookingApi, driverApi, money, parseError, vehicleApi, vehicleImageUrl,
 } from '../../api.js'
 import FormField, { Alert } from '../../components/FormField.jsx'
+import { DRIVER_CHOICES, saveWithDriverChoice } from './driverChoice.js'
 
 /**
  * The public rent form.
@@ -21,7 +22,7 @@ export default function RentForm({ customer }) {
   const [vehicle, setVehicle] = useState(null)
   const [drivers, setDrivers] = useState([])
   const [form, setForm] = useState({
-    startDate: '', endDate: '', driverId: '',
+    startDate: '', endDate: '', driverChoice: '',
     nic: '', drivingLicenceNo: '',
   })
   const [fieldErrors, setFieldErrors] = useState({})
@@ -69,15 +70,18 @@ export default function RentForm({ customer }) {
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return null
 
     const days = Math.max(1, Math.round((end - start) / 86400000))
-    const driver = drivers.find((d) => String(d.driverId) === String(form.driverId))
-    const driverRate = driver ? Number(driver.dailyCharge ?? 0) : 0
+    // Which driver is assigned is decided on submit, so the first available
+    // one stands in for the charge until the server confirms it.
+    const driverRate = form.driverChoice === 'DRIVER'
+      ? Number(drivers[0]?.dailyCharge ?? 0)
+      : 0
     return {
       days, rate, driverRate,
       vehicleTotal: days * rate,
       driverTotal: days * driverRate,
       total: days * (rate + driverRate),
     }
-  }, [vehicle, drivers, form.startDate, form.endDate, form.driverId])
+  }, [vehicle, drivers, form.startDate, form.endDate, form.driverChoice])
 
   const submit = (e) => {
     e.preventDefault()
@@ -85,15 +89,19 @@ export default function RentForm({ customer }) {
     setError('')
     setFieldErrors({})
 
-    bookingApi.create({
-      customerId: customer.customerId,
-      vehicleId: Number(vehicleId),
-      driverId: form.driverId === '' ? null : Number(form.driverId),
-      startDate: form.startDate,
-      endDate: form.endDate,
-      nic: form.nic,
-      drivingLicenceNo: form.drivingLicenceNo,
-    })
+    saveWithDriverChoice(
+      bookingApi.create,
+      {
+        customerId: customer.customerId,
+        vehicleId: Number(vehicleId),
+        startDate: form.startDate,
+        endDate: form.endDate,
+        nic: form.nic,
+        drivingLicenceNo: form.drivingLicenceNo,
+      },
+      form.driverChoice,
+      drivers,
+    )
       .then(() => navigate('/my-bookings', { state: { justBooked: true } }))
       .catch((err) => {
         const parsed = parseError(err)
@@ -138,25 +146,20 @@ export default function RentForm({ customer }) {
               <FormField label="Start Date" name="startDate" type="date" value={form.startDate}
                          onChange={change} required error={fieldErrors.startDate} />
               <FormField label="End Date" name="endDate" type="date" value={form.endDate}
-                         onChange={change} required error={fieldErrors.endDate}
-                         hint="Same day counts as one day" />
+                         onChange={change} required error={fieldErrors.endDate} />
 
-              <FormField label="Driver" name="driverId" as="select" value={form.driverId}
-                         onChange={change} error={fieldErrors.driverId} full
-                         hint="Leave empty to drive it yourself"
-                         options={drivers.map((d) => ({
-                           value: d.driverId,
-                           label: `${d.fullName} — ${money(d.dailyCharge)}/day`,
-                         }))} />
+              <FormField label="Driver" name="driverChoice" as="select" value={form.driverChoice}
+                         onChange={change} required error={fieldErrors.driverId} full
+                         options={DRIVER_CHOICES} />
             </div>
 
             <div className="rent-licence">
               <h3>Licence details</h3>
-              <p className="cell-sub">
-                {customer.nic
-                  ? 'We already have these on file. Update them if anything has changed.'
-                  : 'We need these before you can rent a vehicle. They are saved to your account for next time.'}
-              </p>
+              {!customer.nic && (
+                <p className="cell-sub">
+                  We need these before you can rent a vehicle. They are saved to your account for next time.
+                </p>
+              )}
               <div className="form-grid">
                 <FormField label="NIC" name="nic" value={form.nic} onChange={change}
                            required error={fieldErrors.nic} placeholder="200012345678" />
