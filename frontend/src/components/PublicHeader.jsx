@@ -62,11 +62,6 @@ export default function PublicHeader({ customer, onLogout, children }) {
       </header>
 
       <main className="site-main">{children}</main>
-
-      <footer className="site-footer">
-        <span>RentoX — Vehicle Rental Management System</span>
-        <a href="/staff">Staff login</a>
-      </footer>
     </div>
   )
 }
