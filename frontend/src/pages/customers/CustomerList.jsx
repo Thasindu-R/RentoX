@@ -1,9 +1,52 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import { customerApi, parseError } from '../../api.js'
 import DataTable from '../../components/DataTable.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import { Alert } from '../../components/FormField.jsx'
+
+function Detail({ label, children }) {
+  return (
+    <div>
+      <div className="detail-label">{label}</div>
+      <div className="detail-value">{children || '—'}</div>
+    </div>
+  )
+}
+
+/**
+ * Read-only view of one customer. Their details belong to them and are edited
+ * from the public site, so there is nothing to change here.
+ */
+function CustomerDialog({ customer, onClose }) {
+  if (!customer) return null
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal wide" onClick={(e) => e.stopPropagation()}>
+        <h3>{customer.fullName}</h3>
+        <p>Registered customer details.</p>
+
+        <div className="detail-grid">
+          <Detail label="Full name">{customer.fullName}</Detail>
+          <Detail label="Email">{customer.email}</Detail>
+          <Detail label="Phone">{customer.phone}</Detail>
+          <Detail label="Registered">{customer.registeredDate}</Detail>
+          <Detail label="NIC">
+            {customer.nic ? <span className="mono">{customer.nic}</span> : null}
+          </Detail>
+          <Detail label="Driving licence no">
+            {customer.drivingLicenceNo ? <span className="mono">{customer.drivingLicenceNo}</span> : null}
+          </Detail>
+          <Detail label="Address">{customer.address}</Detail>
+        </div>
+
+        <div className="modal-actions" style={{ marginTop: 20 }}>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function CustomerList() {
   const [rows, setRows] = useState([])
@@ -12,8 +55,8 @@ export default function CustomerList() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [target, setTarget] = useState(null)
+  const [viewing, setViewing] = useState(null)
   const [busy, setBusy] = useState(false)
-  const navigate = useNavigate()
 
   const load = (q = '') => {
     setLoading(true)
@@ -102,12 +145,14 @@ export default function CustomerList() {
           emptyText={search ? 'Try a different name or NIC.' : 'Customers appear here once they sign up to the system.'}
           actions={(c) => (
             <>
-              <button className="btn-link" onClick={() => navigate(`/staff/customers/${c.customerId}/edit`)}>Edit</button>
+              <button className="btn-link" onClick={() => setViewing(c)}>View</button>
               <button className="btn-link danger" onClick={() => setTarget(c)}>Delete</button>
             </>
           )}
         />
       </div>
+
+      <CustomerDialog customer={viewing} onClose={() => setViewing(null)} />
 
       <ConfirmDialog
         open={!!target}
