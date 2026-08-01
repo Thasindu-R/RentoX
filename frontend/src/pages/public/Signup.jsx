@@ -20,7 +20,7 @@ export default function Signup({ onLogin, customer }) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Set by Browse when someone clicks "Rent this car" while signed out, so we
+  // Set by Browse when someone clicks "Rent it!" while signed out, so we
   // can drop them back on that vehicle once the account exists.
   const redirectTo = location.state?.redirectTo || '/'
 
