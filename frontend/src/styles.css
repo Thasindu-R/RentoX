@@ -429,7 +429,7 @@ table.data th.num { text-align: right; }
 .modal-actions { display: flex; gap: 9px; justify-content: flex-end; }
 
 /* Roomier variant, for reading a record rather than answering a question. */
-.modal.wide { max-width: 560px; }
+.modal.wide { max-width: 560px; max-height: calc(100vh - 40px); overflow-y: auto; }
 
 /* ---------- Login -------------------------------------------------------- */
 
@@ -600,6 +600,7 @@ table.data th.num { text-align: right; }
 }
 .booking-thumb.placeholder { background: var(--grey-soft); }
 .booking-info { flex: 1; min-width: 0; }
+.booking-actions { display: flex; gap: 14px; margin-top: 9px; }
 .booking-cancelled {
   margin-top: 8px; padding: 7px 10px; border-radius: var(--radius-sm);
   background: var(--red-soft); color: var(--red); font-size: 12.5px;
