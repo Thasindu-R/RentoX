@@ -77,7 +77,7 @@ export default function DriverList() {
       <div className="page-head">
         <div>
           <h1>Drivers</h1>
-          <p>Drivers who can be assigned to "with driver" rentals.</p>
+          <p>Manage your drivers here.</p>
         </div>
         <Link to="/staff/drivers/new" className="btn btn-primary">+ Add Driver</Link>
       </div>

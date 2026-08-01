@@ -107,8 +107,7 @@ export default function BookingList() {
       <div className="page-head">
         <div>
           <h1>Bookings</h1>
-          <p>Rental bookings, placed by customers on the public site. The total is
-             calculated by the server from the dates and rates.</p>
+          <p>Rental bookings, placed by customers.</p>
         </div>
       </div>
 

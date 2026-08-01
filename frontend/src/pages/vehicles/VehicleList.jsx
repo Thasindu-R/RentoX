@@ -102,7 +102,7 @@ export default function VehicleList() {
       <div className="page-head">
         <div>
           <h1>Vehicles</h1>
-          <p>The rental fleet. Click a status badge to change it.</p>
+          <p>Manage your rental fleet here.</p>
         </div>
         <Link to="/staff/vehicles/new" className="btn btn-primary">+ Add Vehicle</Link>
       </div>

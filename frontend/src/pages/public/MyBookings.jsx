@@ -96,7 +96,7 @@ export default function MyBookings({ customer }) {
                       customer finds out, so it says more than the badge. */}
                   {b.status === 'CANCELLED' && (
                     <div className="booking-cancelled">
-                      This booking was cancelled by RentoX and the vehicle has been
+                      This booking was cancelled by Rento and the vehicle has been
                       released. Please contact us if you were not expecting this.
                     </div>
                   )}

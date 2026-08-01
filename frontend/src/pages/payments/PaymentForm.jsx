@@ -93,7 +93,7 @@ export default function PaymentForm() {
       <div className="page-head">
         <div>
           <h1>{editing ? 'Edit Payment' : 'Record Payment'}</h1>
-          <p>Payments cannot add up to more than the booking total.</p>
+          <p>Record and manage rental payments here.</p>
         </div>
       </div>
 
