@@ -71,17 +71,16 @@ export default function Signup({ onLogin, customer }) {
         <form onSubmit={submit}>
           <div className="form-grid">
             <FormField label="Full Name" name="fullName" value={form.fullName} onChange={change}
-                       required error={fieldErrors.fullName} placeholder="Nimal Perera" full />
+                       required error={fieldErrors.fullName} placeholder="Kavinda Gayan" full />
             <FormField label="Email" name="email" type="email" value={form.email} onChange={change}
-                       required error={fieldErrors.email} placeholder="you@example.com"
-                       hint="You will sign in with this" />
+                       required error={fieldErrors.email} placeholder="example@gmail.com" />
             <FormField label="Phone" name="phone" value={form.phone} onChange={change}
-                       required error={fieldErrors.phone} placeholder="0771234567" />
+                       required error={fieldErrors.phone} placeholder="07xxxxxxxx" />
             <FormField label="Password" name="password" type="password" value={form.password}
                        onChange={change} required error={fieldErrors.password}
                        placeholder="At least 6 characters" />
             <FormField label="Confirm Password" name="confirm" type="password" value={form.confirm}
-                       onChange={change} required error={fieldErrors.confirm} placeholder="Repeat it" />
+                       onChange={change} required error={fieldErrors.confirm} placeholder="******" />
             <FormField label="Address" name="address" as="textarea" value={form.address}
                        onChange={change} error={fieldErrors.address}
                        placeholder="123 Galle Road, Colombo" full />
@@ -97,7 +96,7 @@ export default function Signup({ onLogin, customer }) {
           Already have an account? <Link to="/login" state={location.state}>Sign in</Link>
         </div>
         <div className="field-hint" style={{ textAlign: 'center', marginTop: 10 }}>
-          Your NIC and driving licence are collected later, when you book.
+          Enjoy your ride! Your personal information is safe with us.
         </div>
       </div>
     </div>
