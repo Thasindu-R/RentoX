@@ -21,7 +21,6 @@ import VehicleForm from './pages/vehicles/VehicleForm.jsx'
 import DriverList from './pages/drivers/DriverList.jsx'
 import DriverForm from './pages/drivers/DriverForm.jsx'
 import BookingList from './pages/bookings/BookingList.jsx'
-import BookingForm from './pages/bookings/BookingForm.jsx'
 import BookingDetail from './pages/bookings/BookingDetail.jsx'
 import PaymentList from './pages/payments/PaymentList.jsx'
 import PaymentForm from './pages/payments/PaymentForm.jsx'
@@ -103,10 +102,10 @@ export default function App() {
           <Route path="/staff/drivers/new" element={<DriverForm />} />
           <Route path="/staff/drivers/:id/edit" element={<DriverForm />} />
 
-          {/* No "new booking" route - customers book for themselves. */}
+          {/* Bookings are made by customers and only looked at here - staff
+              can move the status (including cancelling), not rewrite them. */}
           <Route path="/staff/bookings" element={<BookingList />} />
           <Route path="/staff/bookings/:id" element={<BookingDetail />} />
-          <Route path="/staff/bookings/:id/edit" element={<BookingForm />} />
 
           <Route path="/staff/payments" element={<PaymentList />} />
           <Route path="/staff/payments/new" element={<PaymentForm />} />

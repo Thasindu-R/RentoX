@@ -71,7 +71,6 @@ export default function BookingDetail() {
         </div>
         <div style={{ display: 'flex', gap: 9 }}>
           <button className="btn btn-secondary" onClick={() => navigate('/staff/bookings')}>← Back</button>
-          <button className="btn btn-secondary" onClick={() => navigate(`/staff/bookings/${id}/edit`)}>Edit</button>
           <Link to="/staff/payments/new" className="btn btn-primary">+ Record Payment</Link>
         </div>
       </div>

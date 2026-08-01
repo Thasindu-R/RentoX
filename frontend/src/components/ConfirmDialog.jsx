@@ -7,6 +7,8 @@ export default function ConfirmDialog({
   title = 'Are you sure?',
   message,
   confirmLabel = 'Delete',
+  // Worth overriding when "Cancel" would read as the action, not the way out.
+  cancelLabel = 'Cancel',
   busy = false,
   onConfirm,
   onCancel,
@@ -20,7 +22,7 @@ export default function ConfirmDialog({
         <p>{message}</p>
         <div className="modal-actions">
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={busy}>
-            Cancel
+            {cancelLabel}
           </button>
           <button type="button" className="btn btn-danger" onClick={onConfirm} disabled={busy}>
             {busy ? 'Working…' : confirmLabel}
