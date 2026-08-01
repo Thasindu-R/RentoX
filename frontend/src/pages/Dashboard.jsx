@@ -64,7 +64,6 @@ export default function Dashboard() {
           <h1>Dashboard</h1>
           <p>Fleet and booking summary at a glance.</p>
         </div>
-        <Link to="/staff/bookings/new" className="btn btn-primary">+ New Booking</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
