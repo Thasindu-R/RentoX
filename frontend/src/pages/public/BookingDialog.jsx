@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { bookingApi, driverApi, money, parseError, statusClass } from '../../api.js'
 import FormField, { Alert } from '../../components/FormField.jsx'
+import { choiceFor, DRIVER_CHOICES, saveWithDriverChoice } from './driverChoice.js'
 
 function Detail({ label, children }) {
   return (
@@ -26,7 +27,7 @@ export default function BookingDialog({
 
   const [mode, setMode] = useState(initialMode)
   const [drivers, setDrivers] = useState([])
-  const [form, setForm] = useState({ startDate: '', endDate: '', driverId: '' })
+  const [form, setForm] = useState({ startDate: '', endDate: '', driverChoice: '' })
   const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -38,7 +39,7 @@ export default function BookingDialog({
     setForm({
       startDate: booking.startDate ?? '',
       endDate: booking.endDate ?? '',
-      driverId: booking.driver?.driverId ?? '',
+      driverChoice: choiceFor(booking),
     })
     setFieldErrors({})
     setError('')
@@ -61,10 +62,13 @@ export default function BookingDialog({
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return null
 
     const days = Math.max(1, Math.round((end - start) / 86400000))
-    const driver = drivers.find((d) => String(d.driverId) === String(form.driverId))
-    const driverRate = driver ? Number(driver.dailyCharge ?? 0) : 0
+    // Which driver is assigned is decided on save, so the first available one
+    // stands in for the charge until the server confirms it.
+    const driverRate = form.driverChoice === 'DRIVER'
+      ? Number(drivers[0]?.dailyCharge ?? 0)
+      : 0
     return { days, total: days * (rate + driverRate) }
-  }, [booking, drivers, form.startDate, form.endDate, form.driverId])
+  }, [booking, drivers, form.startDate, form.endDate, form.driverChoice])
 
   const change = (e) => {
     const { name, value } = e.target
@@ -81,13 +85,17 @@ export default function BookingDialog({
     // No status in the payload: the server leaves it alone, so it stays PENDING.
     // NIC and licence are left out too - they are already on the account, and
     // the server keeps what it holds when they are not sent.
-    bookingApi.update(booking.bookingId, {
-      customerId,
-      vehicleId: booking.vehicle?.vehicleId,
-      driverId: form.driverId === '' ? null : Number(form.driverId),
-      startDate: form.startDate,
-      endDate: form.endDate,
-    })
+    saveWithDriverChoice(
+      (data) => bookingApi.update(booking.bookingId, data),
+      {
+        customerId,
+        vehicleId: booking.vehicle?.vehicleId,
+        startDate: form.startDate,
+        endDate: form.endDate,
+      },
+      form.driverChoice,
+      drivers,
+    )
       .then(() => onSaved())
       .catch((err) => {
         const parsed = parseError(err)
@@ -118,15 +126,10 @@ export default function BookingDialog({
               <FormField label="Start Date" name="startDate" type="date" value={form.startDate}
                          onChange={change} required error={fieldErrors.startDate} />
               <FormField label="End Date" name="endDate" type="date" value={form.endDate}
-                         onChange={change} required error={fieldErrors.endDate}
-                         hint="Same day counts as one day" />
-              <FormField label="Driver" name="driverId" as="select" value={form.driverId}
-                         onChange={change} error={fieldErrors.driverId} full
-                         hint="Leave empty to drive it yourself"
-                         options={drivers.map((d) => ({
-                           value: d.driverId,
-                           label: `${d.fullName} — ${money(d.dailyCharge)}/day`,
-                         }))} />
+                         onChange={change} required error={fieldErrors.endDate} />
+              <FormField label="Driver" name="driverChoice" as="select" value={form.driverChoice}
+                         onChange={change} required error={fieldErrors.driverId} full
+                         options={DRIVER_CHOICES} />
             </div>
 
             <div className="summary-row total" style={{ marginTop: 6 }}>
