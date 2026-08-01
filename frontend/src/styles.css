@@ -600,6 +600,10 @@ table.data th.num { text-align: right; }
 }
 .booking-thumb.placeholder { background: var(--grey-soft); }
 .booking-info { flex: 1; min-width: 0; }
+.booking-cancelled {
+  margin-top: 8px; padding: 7px 10px; border-radius: var(--radius-sm);
+  background: var(--red-soft); color: var(--red); font-size: 12.5px;
+}
 .booking-title { display: flex; align-items: center; gap: 10px; }
 .booking-title h3 { font-size: 15px; }
 .booking-meta {

@@ -80,6 +80,14 @@ export default function MyBookings({ customer }) {
                     <span>{b.totalDays} day{b.totalDays === 1 ? '' : 's'}</span>
                     <span>{b.driver ? `Driver: ${b.driver.fullName}` : 'Self-drive'}</span>
                   </div>
+                  {/* Staff cancel from the bookings list; this is where the
+                      customer finds out, so it says more than the badge. */}
+                  {b.status === 'CANCELLED' && (
+                    <div className="booking-cancelled">
+                      This booking was cancelled by RentoX and the vehicle has been
+                      released. Please contact us if you were not expecting this.
+                    </div>
+                  )}
                 </div>
                 <div className="booking-money">
                   <div className="cell-sub">Total</div>
