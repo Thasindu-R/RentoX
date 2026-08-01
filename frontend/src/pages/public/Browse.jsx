@@ -60,7 +60,7 @@ function VehicleCard({ vehicle, onRent }) {
             onClick={() => onRent(vehicle)}
             title={rentable ? 'Rent this vehicle' : 'This vehicle is not available'}
           >
-            {rentable ? 'Rent this car' : 'Unavailable'}
+            {rentable ? 'Rent it!' : 'Unavailable'}
           </button>
         </div>
       </div>
@@ -70,7 +70,7 @@ function VehicleCard({ vehicle, onRent }) {
 
 /**
  * The public landing page. No account needed - anyone can browse the fleet and
- * see the daily rates. Clicking "Rent this car" is the point where an account
+ * see the daily rates. Clicking "Rent it!" is the point where an account
  * becomes necessary, and a visitor without one is sent to sign up.
  */
 export default function Browse({ customer }) {
