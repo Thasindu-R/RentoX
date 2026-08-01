@@ -72,7 +72,7 @@ export default function CategoryList() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <span className="cell-sub">{rows.length} record{rows.length === 1 ? '' : 's'}</span>
+          <span className="cell-sub">{rows.length} vehicle type{rows.length === 1 ? '' : 's'}</span>
         </div>
 
         <DataTable

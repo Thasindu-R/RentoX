@@ -4,13 +4,14 @@ target/
 *.war
 *.class
 
-# ----- IDE -----
+# ----- IDE / tooling -----
 .idea/
 *.iml
 .vscode/
 .settings/
 .classpath
 .project
+.claude/
 
 # ----- Node / React (frontend) -----
 node_modules/

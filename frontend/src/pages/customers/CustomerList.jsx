@@ -74,7 +74,6 @@ export default function CustomerList() {
       <div className="page-head">
         <div>
           <h1>Customers</h1>
-          <p>Registered through the public sign-up form.</p>
         </div>
       </div>
 
@@ -91,7 +90,7 @@ export default function CustomerList() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <span className="cell-sub">{rows.length} record{rows.length === 1 ? '' : 's'}</span>
+          <span className="cell-sub">{rows.length} customer{rows.length === 1 ? '' : 's'}</span>
         </div>
 
         <DataTable
@@ -100,7 +99,7 @@ export default function CustomerList() {
           loading={loading}
           rowKey={(c) => c.customerId}
           emptyTitle={search ? 'No matches' : 'No customers yet'}
-          emptyText={search ? 'Try a different name or NIC.' : 'Customers appear here once they sign up on the public site.'}
+          emptyText={search ? 'Try a different name or NIC.' : 'Customers appear here once they sign up to the system.'}
           actions={(c) => (
             <>
               <button className="btn-link" onClick={() => navigate(`/staff/customers/${c.customerId}/edit`)}>Edit</button>

@@ -76,7 +76,7 @@ export default function CategoryForm() {
             <FormField label="Category Name" name="categoryName" value={form.categoryName} onChange={change}
                        required error={fieldErrors.categoryName} placeholder="Car" />
             <FormField label="Seating Capacity" name="seatingCapacity" type="number" min="1"
-                       value={form.seatingCapacity} onChange={change} error={fieldErrors.seatingCapacity}
+                       value={form.seatingCapacity} onChange={change} required error={fieldErrors.seatingCapacity}
                        placeholder="5" />
             <FormField label="Daily Rate (Rs.)" name="dailyRate" type="number" step="0.01" min="0"
                        value={form.dailyRate} onChange={change} required error={fieldErrors.dailyRate}
