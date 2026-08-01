@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import {
   bookingApi, money, parseError, paymentApi, statusClass, vehicleImageUrl,
 } from '../../api.js'
 import { Alert } from '../../components/FormField.jsx'
+import BookingDialog from './BookingDialog.jsx'
 
 /** A customer's own rentals, with what they still owe on each. */
 export default function MyBookings({ customer }) {
@@ -11,12 +12,15 @@ export default function MyBookings({ customer }) {
   const [balances, setBalances] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  // { booking, mode } for the details/edit dialog.
+  const [dialog, setDialog] = useState(null)
   const location = useLocation()
   const [notice, setNotice] = useState(
     location.state?.justBooked ? 'Your booking is confirmed. Our staff will be in touch.' : ''
   )
 
-  useEffect(() => {
+  // Also re-run after an edit, so the recalculated days and total show.
+  const load = useCallback(() => {
     if (!customer) return
     bookingApi.byCustomer(customer.customerId)
       .then((list) => {
@@ -35,6 +39,14 @@ export default function MyBookings({ customer }) {
       .catch((err) => setError(parseError(err).message))
       .finally(() => setLoading(false))
   }, [customer])
+
+  useEffect(() => { load() }, [load])
+
+  const onSaved = () => {
+    setDialog(null)
+    setNotice('Your booking was updated.')
+    load()
+  }
 
   if (!customer) {
     return <Navigate to="/login" replace state={{ redirectTo: '/my-bookings' }} />
@@ -88,6 +100,18 @@ export default function MyBookings({ customer }) {
                       released. Please contact us if you were not expecting this.
                     </div>
                   )}
+
+                  <div className="booking-actions">
+                    <button className="btn-link" onClick={() => setDialog({ booking: b, mode: 'view' })}>
+                      View details
+                    </button>
+                    {/* Once staff mark it ACTIVE the vehicle is out and the dates are settled. */}
+                    {b.status === 'PENDING' && (
+                      <button className="btn-link" onClick={() => setDialog({ booking: b, mode: 'edit' })}>
+                        Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="booking-money">
                   <div className="cell-sub">Total</div>
@@ -105,6 +129,15 @@ export default function MyBookings({ customer }) {
           })}
         </div>
       )}
+
+      <BookingDialog
+        booking={dialog?.booking}
+        balance={dialog ? balances[dialog.booking.bookingId] : null}
+        customerId={customer.customerId}
+        initialMode={dialog?.mode ?? 'view'}
+        onClose={() => setDialog(null)}
+        onSaved={onSaved}
+      />
     </div>
   )
 }
