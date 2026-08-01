@@ -105,8 +105,8 @@ export default function App() {
           <Route path="/staff/drivers/new" element={<DriverForm />} />
           <Route path="/staff/drivers/:id/edit" element={<DriverForm />} />
 
+          {/* No "new booking" route - customers book for themselves. */}
           <Route path="/staff/bookings" element={<BookingList />} />
-          <Route path="/staff/bookings/new" element={<BookingForm />} />
           <Route path="/staff/bookings/:id" element={<BookingDetail />} />
           <Route path="/staff/bookings/:id/edit" element={<BookingForm />} />
 

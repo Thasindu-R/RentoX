@@ -98,9 +98,9 @@ export default function BookingList() {
       <div className="page-head">
         <div>
           <h1>Bookings</h1>
-          <p>Rental bookings. The total is calculated by the server from the dates and rates.</p>
+          <p>Rental bookings, placed by customers on the public site. The total is
+             calculated by the server from the dates and rates.</p>
         </div>
-        <Link to="/staff/bookings/new" className="btn btn-primary">+ New Booking</Link>
       </div>
 
       <Alert kind="error" onClose={() => setError('')}>{error}</Alert>
@@ -132,7 +132,7 @@ export default function BookingList() {
           loading={loading}
           rowKey={(b) => b.bookingId}
           emptyTitle="No bookings found"
-          emptyText="Adjust the filters, or create a new booking."
+          emptyText="Adjust the filters — bookings arrive when customers rent a vehicle."
           actions={(b) => (
             <>
               <button className="btn-link" onClick={() => navigate(`/staff/bookings/${b.bookingId}`)}>View</button>
