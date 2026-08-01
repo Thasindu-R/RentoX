@@ -28,13 +28,17 @@ export default function PublicHeader({ customer, onLogout, children }) {
           </Link>
 
           <nav className="site-nav">
-            <NavLink to="/" end className={({ isActive }) => 'site-link' + (isActive ? ' active' : '')}>
-              Browse Vehicles
-            </NavLink>
+            {/* Signed-out visitors land on the fleet already, so the link is
+                only useful once a customer has other pages to come back from. */}
             {customer && (
-              <NavLink to="/my-bookings" className={({ isActive }) => 'site-link' + (isActive ? ' active' : '')}>
-                My Bookings
-              </NavLink>
+              <>
+                <NavLink to="/" end className={({ isActive }) => 'site-link' + (isActive ? ' active' : '')}>
+                  Browse Vehicles
+                </NavLink>
+                <NavLink to="/my-bookings" className={({ isActive }) => 'site-link' + (isActive ? ' active' : '')}>
+                  My Bookings
+                </NavLink>
+              </>
             )}
           </nav>
 
