@@ -119,7 +119,8 @@ RentoX/
 ├── SETUP.md
 ├── .gitignore
 ├── database/
-│   └── schema.sql
+│   ├── schema.sql
+│   └── data.sql
 ├── backend/
 │   ├── pom.xml
 │   └── src/main/
@@ -242,6 +243,34 @@ Expected:
 
 Six tables, no data. You will add categories, vehicles and drivers through the staff UI in
 step 8.
+
+### Optional: load the sample data
+
+If you would rather start with a database you can click around in straight away, load the
+seed file instead of typing everything in by hand:
+
+```bash
+mysql -u root -p < database/data.sql
+```
+
+```powershell
+Get-Content database\data.sql | mysql -u root -p
+```
+
+That gives you 6 customers, 5 categories, 10 vehicles, 4 drivers, 6 bookings and 6
+payments. A few things worth knowing:
+
+- **Every seeded customer signs in with the password `customer123`.** The `password`
+  column stores a BCrypt hash, so a row inserted with a plain-text password would create
+  an account that can never log in — the hashes in `data.sql` were generated with the same
+  encoder the app uses.
+- **The admin is not in the seed file.** There is no admin table; `admin` / `admin123` is
+  matched in the browser in `frontend/src/pages/public/CustomerLogin.jsx`.
+- **Vehicle photos may show as placeholders.** `image_path` holds only a file name; the
+  files live in `backend/uploads/`, which is git-ignored, so a fresh clone will not have
+  them. Nothing breaks — upload photos through the vehicle form if you want real images.
+- Re-running `data.sql` is safe. It empties the six tables first, so you always end up
+  with exactly those rows and never a duplicate-key error.
 
 ---
 
