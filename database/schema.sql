@@ -35,6 +35,10 @@ CREATE TABLE customer (
     driving_licence_no  VARCHAR(30)   NULL,
     address             VARCHAR(255),
     registered_date     DATE          NOT NULL DEFAULT (CURRENT_DATE),
+    -- File name of the customer's photo, e.g. "customer-1-b7c2.jpg". Same
+    -- arrangement as vehicle.image_path: the row keeps the name, the file
+    -- lives in backend/uploads/ and is served at /uploads/<name>.
+    image_path          VARCHAR(255)  NULL,
 
     CONSTRAINT uq_customer_email   UNIQUE (email),
     CONSTRAINT uq_customer_nic     UNIQUE (nic),
